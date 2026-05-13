@@ -1,0 +1,198 @@
+.workspaceContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #0f172a;
+  border-radius: 0 0 0.5rem 0.5rem;
+  overflow: hidden;
+}
+
+.apiHeader {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(30, 41, 59, 0.5);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.apiSelect,
+.apiInput,
+.apiSend {
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.apiSelect {
+  font-weight: 600;
+  color: #38bdf8;
+}
+
+.apiInput {
+  flex: 1;
+}
+
+.apiSend {
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.apiBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.apiLabel {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 600;
+  background: #0f172a;
+}
+
+.dataHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(30, 41, 59, 0.5);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.dataTabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dataTabs button {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.dataTabs button.activeTab {
+  color: #38bdf8;
+  border-bottom: 2px solid #38bdf8;
+}
+
+.datasetInfo {
+  font-size: 0.75rem;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.dataWorkspace {
+  flex: 1;
+}
+
+.designHeader {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background: rgba(30, 41, 59, 0.5);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.designHeader h3 {
+  color: #f8fafc;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.designHeader span {
+  color: #a855f7;
+  font-size: 0.75rem;
+}
+
+.designSplit {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.designPreview {
+  flex: 1;
+  border-right: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #020617;
+}
+
+.mockImage {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 16/9;
+  background: linear-gradient(45deg, #1e293b, #0f172a);
+  border: 2px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.designComments {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.textArea {
+  flex: 1;
+  background: #0f172a;
+  border: none;
+  color: #f8fafc;
+  padding: 1rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: none;
+  line-height: 1.5;
+}
+
+.textArea:focus {
+  outline: none;
+}
+
+.richTextToolbar {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: rgba(30, 41, 59, 0.5);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.richTextToolbar button {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+}
+
+.richTextToolbar button:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.separator {
+  width: 1px;
+  background: rgba(148, 163, 184, 0.16);
+  margin: 0 0.25rem;
+}

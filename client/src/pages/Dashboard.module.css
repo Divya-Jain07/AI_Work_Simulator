@@ -1,0 +1,456 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.frontend { --role-accent: #38bdf8; --role-soft: rgba(56, 189, 248, 0.14); }
+.backend { --role-accent: #34d399; --role-soft: rgba(52, 211, 153, 0.14); }
+.analyst { --role-accent: #f59e0b; --role-soft: rgba(245, 158, 11, 0.16); }
+.uiux { --role-accent: #f472b6; --role-soft: rgba(244, 114, 182, 0.14); }
+
+.commandCenter {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.88)),
+    radial-gradient(circle at top right, var(--role-soft), transparent 32%);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.28);
+}
+
+.heroCopy h1 {
+  max-width: 760px;
+  margin: 0.7rem 0 0.45rem;
+  color: #f8fafc;
+  font-size: clamp(1.85rem, 4vw, 3.3rem);
+  line-height: 1;
+  font-weight: 750;
+}
+
+.heroCopy p {
+  max-width: 720px;
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+.livePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  padding: 0.42rem 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  color: #dbeafe;
+  font-size: 0.78rem;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.liveDot,
+.offlineDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+.liveDot {
+  background: #22c55e;
+  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.14);
+}
+
+.offlineDot {
+  background: #f59e0b;
+}
+
+.heroActions {
+  min-width: 270px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.primaryAction,
+.roleButton,
+.taskItem {
+  border: 0;
+  font-family: inherit;
+}
+
+.primaryAction {
+  min-height: 2.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  color: #020617;
+  background: var(--role-accent);
+  border-radius: 0.5rem;
+  font-weight: 750;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+}
+
+.primaryAction:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.managerCard {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.managerCard span,
+.managerCard small {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.managerCard strong {
+  display: block;
+  margin: 0.25rem 0;
+  font-size: 1.05rem;
+}
+
+.roleSwitcher {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.roleButton {
+  min-height: 5rem;
+  padding: 0.9rem;
+  text-align: left;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.roleButton span,
+.roleButton small {
+  display: block;
+}
+
+.roleButton span {
+  color: #f8fafc;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.roleButton small {
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.activeRole {
+  border-color: var(--role-accent);
+  background: linear-gradient(135deg, var(--role-soft), rgba(15, 23, 42, 0.78));
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(330px, 0.85fr);
+  gap: 1rem;
+}
+
+.mainColumn,
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.metricCard,
+.panel {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.72);
+  box-shadow: 0 16px 50px rgba(2, 6, 23, 0.18);
+}
+
+.metricCard {
+  padding: 1rem;
+  color: #e2e8f0;
+}
+
+.metricCard svg {
+  color: var(--role-accent);
+  margin-bottom: 0.8rem;
+}
+
+.metricCard span {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.metricCard strong {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 1.4rem;
+}
+
+.panel {
+  padding: 1rem;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  margin-bottom: 1rem;
+}
+
+.panelHeader h2 {
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.panelHeader svg {
+  color: var(--role-accent);
+}
+
+.eyebrow {
+  display: block;
+  color: var(--role-accent);
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  margin-bottom: 0.2rem;
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.taskItem {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  text-align: left;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  color: #e2e8f0;
+  background: rgba(30, 41, 59, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.taskItem:hover {
+  transform: translateY(-2px);
+  border-color: var(--role-accent);
+}
+
+.taskMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  margin-bottom: 0.35rem;
+}
+
+.taskItem h3 {
+  color: #f8fafc;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.taskItem p {
+  color: #94a3b8;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.taskStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--role-accent);
+}
+
+.statusBadge {
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.14);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.statusEvaluated {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.categoryGrid,
+.widgetList {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.categoryGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.categoryItem,
+.widgetItem {
+  border-radius: 0.5rem;
+  background: rgba(30, 41, 59, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.categoryItem {
+  padding: 0.85rem;
+  min-height: 5.5rem;
+}
+
+.categoryItem span,
+.widgetItem span,
+.widgetItem small,
+.muted {
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.categoryItem strong {
+  display: block;
+  margin-top: 0.55rem;
+  color: #f8fafc;
+  font-size: 1.25rem;
+}
+
+.widgetItem {
+  padding: 0.85rem;
+}
+
+.widgetItem strong {
+  display: block;
+  color: #f8fafc;
+  font-size: 1.2rem;
+  margin: 0.1rem 0;
+}
+
+.skillsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.skillHeader {
+  display: flex;
+  justify-content: space-between;
+  color: #dbeafe;
+  font-size: 0.83rem;
+  margin-bottom: 0.4rem;
+}
+
+.progressBar {
+  height: 0.45rem;
+  background: rgba(148, 163, 184, 0.18);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--role-accent);
+  border-radius: inherit;
+}
+
+.recommendations,
+.feedList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.recommendations span,
+.feedItem {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  color: #dbeafe;
+  background: rgba(30, 41, 59, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: 0.84rem;
+}
+
+.feedItem strong,
+.feedItem span {
+  display: block;
+}
+
+.feedItem strong {
+  color: #f8fafc;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+.feedItem span {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.emptyState {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  color: #94a3b8;
+  background: rgba(30, 41, 59, 0.45);
+  border: 1px dashed rgba(148, 163, 184, 0.25);
+}
+
+@media (max-width: 1180px) {
+  .grid,
+  .commandCenter {
+    grid-template-columns: 1fr;
+  }
+
+  .commandCenter {
+    flex-direction: column;
+  }
+
+  .roleSwitcher {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .categoryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .metricsGrid,
+  .roleSwitcher,
+  .categoryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .taskItem {
+    grid-template-columns: 1fr;
+  }
+}

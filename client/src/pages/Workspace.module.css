@@ -1,0 +1,335 @@
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.3fr);
+  gap: 1rem;
+  min-height: calc(100vh - 118px);
+}
+
+.leftPane {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.rightPane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 720px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.5rem;
+  background: #111827;
+  overflow: hidden;
+  box-shadow: 0 22px 70px rgba(2, 6, 23, 0.28);
+}
+
+.backButton,
+.submitButton {
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  border-radius: 0.5rem;
+}
+
+.backButton {
+  width: fit-content;
+  padding: 0.65rem 0.85rem;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.taskDetails,
+.panel,
+.evaluationCard {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.74);
+  box-shadow: 0 18px 54px rgba(2, 6, 23, 0.18);
+}
+
+.taskDetails {
+  padding: 1.1rem;
+}
+
+.taskTopline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  margin-bottom: 0.85rem;
+}
+
+.taskTopline span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.taskHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.taskHeader h1 {
+  color: #f8fafc;
+  font-size: 1.55rem;
+  line-height: 1.1;
+}
+
+.difficulty {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  color: #bae6fd;
+  background: rgba(56, 189, 248, 0.13);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.description {
+  color: #cbd5e1;
+  line-height: 1.55;
+  margin: 0.9rem 0 0;
+}
+
+.contextBox {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: 0.5rem;
+  background: rgba(30, 41, 59, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.contextBox strong {
+  display: block;
+  color: #f8fafc;
+  margin-bottom: 0.3rem;
+}
+
+.contextBox p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.panel {
+  padding: 0.9rem;
+}
+
+.panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #f8fafc;
+  font-size: 0.92rem;
+  margin-bottom: 0.75rem;
+}
+
+.panel h2 svg {
+  color: #38bdf8;
+}
+
+.panel ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.52rem;
+}
+
+.panel li {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  line-height: 1.38;
+}
+
+.panel li::before {
+  content: "";
+  display: inline-block;
+  width: 0.38rem;
+  height: 0.38rem;
+  margin-right: 0.45rem;
+  border-radius: 999px;
+  background: #38bdf8;
+  vertical-align: 0.08rem;
+}
+
+.evaluationCard {
+  padding: 1rem;
+}
+
+.evaluationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.evaluationHeader span {
+  display: block;
+  color: #38bdf8;
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.evaluationHeader h2 {
+  color: #f8fafc;
+  font-size: 1.1rem;
+}
+
+.scoreCircle {
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  color: #bbf7d0;
+}
+
+.scoreCircle strong {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.scoreCircle span {
+  color: #86efac;
+  font-size: 0.7rem;
+}
+
+.feedback {
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.reviewGrid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(30, 41, 59, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.reviewGrid h3 {
+  color: #f8fafc;
+  font-size: 0.85rem;
+}
+
+.reviewGrid span {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  line-height: 1.34;
+}
+
+.skillBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+}
+
+.skillBadges span {
+  padding: 0.34rem 0.55rem;
+  border-radius: 999px;
+  color: #dbeafe;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  font-size: 0.75rem;
+}
+
+.chatWrapper {
+  min-height: 420px;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  color: #f8fafc;
+  background: #0f172a;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.editorHeader span {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  font-weight: 750;
+}
+
+.editorHeader h2 {
+  margin-top: 0.2rem;
+  font-size: 1rem;
+  text-transform: capitalize;
+}
+
+.submitButton {
+  padding: 0.65rem 0.85rem;
+  color: #020617;
+  background: #38bdf8;
+  font-weight: 750;
+}
+
+.submitButton:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.editorContainer {
+  flex: 1;
+  min-height: 0;
+}
+
+.errorBanner,
+.loading {
+  padding: 0.8rem 1rem;
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.1);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.loading {
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 0.5rem;
+}
+
+@media (max-width: 1180px) {
+  .workspace,
+  .detailGrid,
+  .reviewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .rightPane {
+    min-height: 620px;
+  }
+}
