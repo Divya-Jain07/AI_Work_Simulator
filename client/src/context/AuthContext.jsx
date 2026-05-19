@@ -24,7 +24,9 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Login failed' };
+      const message = error.response?.data?.message
+        || (error.code === 'ERR_NETWORK' ? 'Cannot reach the server. Start the backend (npm run dev in server/) and ensure MongoDB is connected.' : 'Login failed');
+      return { success: false, message };
     }
   };
 
@@ -36,7 +38,9 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Registration failed' };
+      const message = error.response?.data?.message
+        || (error.code === 'ERR_NETWORK' ? 'Cannot reach the server. Start the backend (npm run dev in server/) and ensure MongoDB is connected.' : 'Registration failed');
+      return { success: false, message };
     }
   };
 

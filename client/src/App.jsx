@@ -1,32 +1,55 @@
 import { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import RoleSelect from './pages/RoleSelect';
 import Dashboard from './pages/Dashboard';
 import Workspace from './pages/Workspace';
+import Profile from './pages/Profile';
 import Layout from './components/layout/Layout';
 import { WorkplaceProvider } from './context/WorkplaceContext';
 
-const ProtectedRoute = ({ children }) => {
+const Loading = () => <div className="app-loading">Loading workplace...</div>;
+
+const AuthenticatedShell = ({ children, withLayout = true }) => {
   const { user, loading } = useContext(AuthContext);
-  if (loading) return <div className="app-loading">Loading workplace...</div>;
-  if (!user) return <Navigate to="/login" />;
+  if (loading) return <Loading />;
+  if (!user) return <Navigate to="/login" replace />;
+
   return (
     <WorkplaceProvider>
-      <Layout>{children}</Layout>
+      {withLayout ? <Layout>{children}</Layout> : children}
     </WorkplaceProvider>
   );
+};
+
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useContext(AuthContext);
+  if (loading) return <Loading />;
+  if (user) return <Navigate to="/choose-role" replace />;
+  return children;
+};
+
+const LandingRoute = () => {
+  const { user, loading } = useContext(AuthContext);
+  if (loading) return <Loading />;
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <Landing />;
 };
 
 function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      
-      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/task/:id" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
+      <Route path="/" element={<LandingRoute />} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+
+      <Route path="/choose-role" element={<AuthenticatedShell withLayout={false}><RoleSelect /></AuthenticatedShell>} />
+      <Route path="/dashboard" element={<AuthenticatedShell><Dashboard /></AuthenticatedShell>} />
+      <Route path="/profile" element={<AuthenticatedShell><Profile /></AuthenticatedShell>} />
+      <Route path="/task/:id" element={<AuthenticatedShell><Workspace /></AuthenticatedShell>} />
     </Routes>
   );
 }

@@ -18,13 +18,13 @@ export const switchUserRole = async ({ user, roleId }) => {
   user.markModified?.('roleSkills');
   await user.save();
 
-  return buildRoleContext(user, role.id);
+  return await buildRoleContext(user, role.id);
 };
 
 export const assignRoleTask = async ({ user, requestedRoleId }) => {
   const role = resolveRole(requestedRoleId || getUserRole(user).id);
   const manager = getManagerForRole(role.id);
-  const roleContext = buildRoleContext(user, role.id);
+  const roleContext = await buildRoleContext(user, role.id);
   const generatedTask = await aiService.generateTaskForRole({ user, role, manager });
 
   const task = await Task.create({
@@ -77,6 +77,7 @@ export const evaluateRoleSubmission = async ({ user, taskId, content }) => {
     strengths: evaluation.strengths || [],
     weaknesses: evaluation.weaknesses || [],
     suggestions: evaluation.suggestions || [],
+    recommendations: evaluation.recommendations || [],
     skillUpdates: evaluation.skillUpdates || {}
   });
 
@@ -92,6 +93,6 @@ export const evaluateRoleSubmission = async ({ user, taskId, content }) => {
     evaluation,
     newSkills: user.skills,
     skillGraph: updatedSkillGraph,
-    roleContext: buildRoleContext(user, role.id)
+    roleContext: await buildRoleContext(user, role.id)
   };
 };

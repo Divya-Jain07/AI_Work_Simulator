@@ -25,7 +25,7 @@ export const registerUser = async (req, res) => {
         email: user.email,
         role: user.role,
         activeWorkRole: user.activeWorkRole,
-        roleContext: buildRoleContext(user),
+        roleContext: await buildRoleContext(user),
         skills: user.skills,
         token: generateToken(user._id)
       });
@@ -50,7 +50,7 @@ export const loginUser = async (req, res) => {
         email: user.email,
         role: user.role,
         activeWorkRole: user.activeWorkRole,
-        roleContext: buildRoleContext(user),
+        roleContext: await buildRoleContext(user),
         skills: user.skills,
         token: generateToken(user._id)
       });
@@ -68,7 +68,7 @@ export const getProfile = async (req, res) => {
     if (user) {
       res.json({
         ...user.toObject(),
-        roleContext: buildRoleContext(user)
+        roleContext: await buildRoleContext(user)
       });
     } else {
       res.status(404).json({ message: 'User not found' });

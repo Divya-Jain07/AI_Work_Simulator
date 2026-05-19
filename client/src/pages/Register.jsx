@@ -15,7 +15,7 @@ const Register = () => {
     e.preventDefault();
     const res = await register(name, email, password);
     if (res.success) {
-      navigate('/');
+      navigate('/choose-role');
     } else {
       setError(res.message);
     }

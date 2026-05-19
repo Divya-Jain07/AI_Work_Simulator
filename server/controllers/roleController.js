@@ -4,12 +4,12 @@ import { switchUserRole } from '../services/taskOrchestrator.js';
 export const listRoles = async (req, res) => {
   res.json({
     roles: getAvailableRoles(),
-    current: buildRoleContext(req.user)
+    current: await buildRoleContext(req.user)
   });
 };
 
 export const getRoleContext = async (req, res) => {
-  res.json(buildRoleContext(req.user, req.params.roleId));
+  res.json(await buildRoleContext(req.user, req.params.roleId));
 };
 
 export const changeRole = async (req, res) => {

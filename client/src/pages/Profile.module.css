@@ -1,0 +1,117 @@
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 720px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.avatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.14);
+}
+
+.hero h1 {
+  color: #f8fafc;
+  font-size: 1.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.hero p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.roleBadge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #dbeafe;
+  background: rgba(37, 99, 235, 0.25);
+}
+
+.panel {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.panel h2 {
+  color: #f8fafc;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.panel p {
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.muted {
+  color: #94a3b8 !important;
+  font-size: 0.88rem;
+}
+
+.linkBtn {
+  display: inline-flex;
+  margin-top: 0.85rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #020617;
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+}
+
+.skills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.skillRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.skillHeader {
+  display: flex;
+  justify-content: space-between;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+
+.bar {
+  height: 0.45rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #2563eb);
+}

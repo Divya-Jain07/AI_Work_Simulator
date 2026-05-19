@@ -24,6 +24,11 @@
   background: linear-gradient(135deg, var(--primary), #8b5cf6);
   border-radius: var(--radius-lg);
   margin: 0 auto 1rem;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 1.55rem;
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.15);
 }
 
 .authHeader h2 {

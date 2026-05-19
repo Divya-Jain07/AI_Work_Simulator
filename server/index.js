@@ -2,6 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import http from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { Server } from 'socket.io';
 import connectDB from './config/db.js';
 
@@ -11,7 +13,8 @@ import aiRoutes from './routes/aiRoutes.js';
 import roleRoutes from './routes/roleRoutes.js';
 import { registerWorkplaceSocket } from './sockets/workplaceSocket.js';
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const server = http.createServer(app);

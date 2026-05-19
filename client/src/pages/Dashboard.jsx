@@ -48,16 +48,13 @@ const formatSkill = (skill) => skill
 
 const Dashboard = () => {
   const {
-    roles,
     roleContext,
     tasks,
     connected,
     loading,
     assigning,
-    switchingRole,
     activity,
     activeRoleId,
-    changeRole,
     requestTask
   } = useContext(WorkplaceContext);
   const navigate = useNavigate();
@@ -110,21 +107,7 @@ const Dashboard = () => {
         </div>
       </section>
 
-      <section className={styles.roleSwitcher} aria-label="Choose workplace role">
-        {roles.map((role) => (
-          <button
-            key={role.id}
-            className={`${styles.roleButton} ${activeRoleId === role.id ? styles.activeRole : ''}`}
-            disabled={switchingRole}
-            onClick={() => changeRole(role.id)}
-          >
-            <span>{role.label}</span>
-            <small>{role.taskCategories.slice(0, 2).join(' / ')}</small>
-          </button>
-        ))}
-      </section>
-
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         <motion.div
           key={activeRoleId}
           initial={{ opacity: 0, y: 14 }}
@@ -270,9 +253,17 @@ const Dashboard = () => {
                 <FiActivity />
               </div>
               <div className={styles.recommendations}>
-                {(roleContext?.learningRecommendations || []).map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
+                {(roleContext?.learningRecommendations || []).map((item, i) => {
+                  const text = typeof item === 'string' ? item : item?.text || String(item);
+                  const url = typeof item === 'object' ? item?.courseUrl : null;
+                  return url ? (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" className={styles.recLink}>
+                      {text}
+                    </a>
+                  ) : (
+                    <span key={i}>{text}</span>
+                  );
+                })}
               </div>
             </div>
 

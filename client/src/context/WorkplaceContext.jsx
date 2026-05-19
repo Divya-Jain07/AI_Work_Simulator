@@ -171,7 +171,8 @@ export const WorkplaceProvider = ({ children }) => {
   }, [applyRoleContext, pushActivity, setUserFromWorkplace, user?.token]);
 
   const changeRole = useCallback(async (roleId) => {
-    if (!roleId || roleId === activeRoleId || switchingRole) return;
+    if (!roleId || switchingRole) return { ok: false };
+    if (roleId === activeRoleId) return { ok: true };
 
     setSwitchingRole(true);
     const previewContext = buildPreviewRoleContext(roleId);
@@ -187,31 +188,12 @@ export const WorkplaceProvider = ({ children }) => {
     }
 
     try {
-      const socket = socketRef.current;
-      if (socket?.connected) {
-        const response = await new Promise((resolve) => {
-          const timeoutId = setTimeout(() => {
-            resolve({ ok: false, message: 'Realtime acknowledgement timed out.' });
-          }, 2500);
-
-          socket.emit('role:change', { roleId }, (socketResponse) => {
-            clearTimeout(timeoutId);
-            resolve(socketResponse);
-          });
-        });
-
-        if (response?.ok && response.roleContext) {
-          applyRoleContext(response.roleContext);
-          return;
-        }
-
-        pushActivity({ type: 'error', title: 'Realtime role switch failed', detail: response?.message || 'Retrying over HTTP.' });
-      }
-
       const { data } = await axios.patch(`${API_URL}/api/roles/active`, { roleId });
       applyRoleContext(data);
+      return { ok: true };
     } catch (error) {
       pushActivity({ type: 'error', title: 'Role switch failed', detail: error.response?.data?.message || error.message });
+      return { ok: false, message: error.response?.data?.message || error.message };
     } finally {
       setSwitchingRole(false);
     }

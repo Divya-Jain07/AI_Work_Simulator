@@ -1,4 +1,5 @@
 import { DEFAULT_WORKPLACE_ROLE, WORKPLACE_ROLES, normalizeRoleId } from '../config/roleConfig.js';
+import Submission from '../models/Submission.js';
 import frontendManager from '../../ai-services/agents/frontendManager.js';
 import backendManager from '../../ai-services/agents/backendManager.js';
 import analystManager from '../../ai-services/agents/analystManager.js';
@@ -52,9 +53,54 @@ export const getEvaluatorForRole = (roleId) => {
   return evaluators[role.evaluatorKey];
 };
 
-export const buildRoleContext = (user, roleId) => {
+export const buildRoleContext = async (user, roleId) => {
   const role = resolveRole(roleId || user?.activeWorkRole);
   const roleSkills = getRoleSkillGraph(user, role.id);
+
+  let learningRecommendations = role.learningRecommendations;
+
+  if (user?._id) {
+    try {
+      const latestSubmission = await Submission.findOne({ user: user._id, role: role.id })
+        .sort({ createdAt: -1 });
+
+      if (latestSubmission) {
+        if (latestSubmission.recommendations && latestSubmission.recommendations.length > 0) {
+          learningRecommendations = latestSubmission.recommendations.map(rec => ({
+            type: rec.type,
+            text: rec.text,
+            courseTitle: rec.courseTitle,
+            courseUrl: rec.courseUrl
+          }));
+        } else if (latestSubmission.weaknesses?.length || latestSubmission.suggestions?.length) {
+          // Fallback map if the submission has legacy weaknesses/suggestions but no structured recommendations
+          const legacyRecs = [];
+          (latestSubmission.weaknesses || []).forEach(w => {
+            legacyRecs.push({
+              type: 'weakness',
+              text: w,
+              courseTitle: `Learn about ${w.slice(0, 30)}...`,
+              courseUrl: `https://www.linkedin.com/learning/search?keywords=${encodeURIComponent(w)}`
+            });
+          });
+          (latestSubmission.suggestions || []).forEach(s => {
+            legacyRecs.push({
+              type: 'suggestion',
+              text: s,
+              courseTitle: `Learn about ${s.slice(0, 30)}...`,
+              courseUrl: `https://www.linkedin.com/learning/search?keywords=${encodeURIComponent(s)}`
+            });
+          });
+          if (legacyRecs.length > 0) {
+            learningRecommendations = legacyRecs;
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Failed to query dynamic learning recommendations:", err);
+    }
+  }
+
   return {
     activeRole: {
       id: role.id,
@@ -69,7 +115,7 @@ export const buildRoleContext = (user, roleId) => {
       systemPrompt: getManagerForRole(role.id).teammateSystemPrompt(role)
     },
     evaluationCriteria: role.evaluationCriteria,
-    learningRecommendations: role.learningRecommendations,
+    learningRecommendations,
     skillGraph: roleSkills
   };
 };

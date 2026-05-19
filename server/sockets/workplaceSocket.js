@@ -13,6 +13,8 @@ const getTokenFromSocket = (socket) => {
 
 export const registerWorkplaceSocket = (io) => {
   io.use(async (socket, next) => {
+    if (typeof next !== 'function') return;
+
     try {
       const token = getTokenFromSocket(socket);
       if (!token) return next(new Error('Socket authentication required'));

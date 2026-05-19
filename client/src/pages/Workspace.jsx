@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext, useMemo } from 'react';
+import { useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Editor from '@monaco-editor/react';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiCheckCircle, FiClock, FiSend, FiShield, FiTarget } from 'react-icons/fi';
+import { FiArrowLeft, FiCheckCircle, FiClock, FiSend, FiShield, FiTarget, FiChevronLeft, FiChevronRight, FiBookOpen, FiCpu } from 'react-icons/fi';
 import Chatbot from '../components/ui/Chatbot';
 import { getWorkspaceComponent } from '../components/workspaces/Workspaces';
 import { AuthContext } from '../context/AuthContext';
@@ -51,6 +51,46 @@ const Workspace = () => {
   const [evaluation, setEvaluation] = useState(null);
   const [error, setError] = useState('');
 
+  // Leetcode-style states
+  const [activeTab, setActiveTab] = useState('description');
+  const [checkedRequirements, setCheckedRequirements] = useState({});
+  const [checkedAcceptance, setCheckedAcceptance] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(550);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = useCallback((mouseDownEvent) => {
+    mouseDownEvent.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback((mouseMoveEvent) => {
+    if (isResizing) {
+      const newWidth = mouseMoveEvent.clientX;
+      if (newWidth >= 280 && newWidth <= 900) {
+        setSidebarWidth(newWidth);
+      }
+    }
+  }, [isResizing]);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResizing);
+    } else {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing, resize, stopResizing]);
+
   useEffect(() => {
     const fetchTask = async () => {
       try {
@@ -87,6 +127,9 @@ const Workspace = () => {
       updateSkills(data.newSkills);
       setTask((current) => ({ ...current, status: 'Evaluated', lastEvaluationScore: data.submission?.score }));
       refreshTasks(task?.role);
+      
+      // Auto-switch to Evaluator Lens to view grade instantly!
+      setActiveTab('evaluator');
     } catch (submitError) {
       setError(submitError.message || 'Evaluation failed.');
     } finally {
@@ -94,111 +137,299 @@ const Workspace = () => {
     }
   };
 
+  const tabs = useMemo(() => [
+    { id: 'description', label: 'Description', icon: <FiBookOpen /> },
+    { id: 'requirements', label: 'Requirements', icon: <FiTarget /> },
+    { id: 'acceptance', label: 'Acceptance Criteria', icon: <FiCheckCircle /> },
+    { id: 'evaluator', label: 'Evaluator Lens', icon: <FiShield />, hasBadge: !!evaluation },
+    { id: 'teammate', label: 'AI Teammate', icon: <FiCpu /> }
+  ], [evaluation]);
+
   if (loading) return <div className={styles.loading}>Loading workspace...</div>;
   if (!task) return <div className={styles.loading}>{error || 'Task not found.'}</div>;
 
   return (
-    <div className={styles.workspace}>
-      <div className={styles.leftPane}>
-        <button className={styles.backButton} onClick={() => navigate('/')}>
-          <FiArrowLeft /> Back to command center
-        </button>
+    <div className={`${styles.workspace} ${!sidebarOpen ? styles.workspaceCollapsed : ''}`}>
+      <div 
+        className={`${styles.leftPane} ${!sidebarOpen ? styles.leftPaneCollapsed : ''}`}
+        style={{ width: sidebarOpen ? sidebarWidth : 0 }}
+      >
+        <div className={styles.paneHeader}>
+          <button className={styles.backButton} onClick={() => navigate('/dashboard')} title="Back to Command Center">
+            <FiArrowLeft />
+          </button>
+          
+          <div className={styles.paneDivider} />
+          
+          <div className={styles.tabBar}>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`${styles.tabButton} ${activeTab === tab.id ? styles.tabButtonActive : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+                {tab.hasBadge && <span className={styles.tabEvaluationBadge}>✓</span>}
+              </button>
+            ))}
+          </div>
 
-        <motion.section
-          className={styles.taskDetails}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className={styles.taskTopline}>
-            <span>{task.category}</span>
-            <span><FiClock /> {task.deadline}</span>
-          </div>
-          <div className={styles.taskHeader}>
-            <h1>{task.title}</h1>
-            <span className={styles.difficulty}>{task.difficulty}</span>
-          </div>
-          <p className={styles.description}>{task.description}</p>
-          {task.businessContext && (
-            <div className={styles.contextBox}>
-              <strong>Business context</strong>
-              <p>{task.businessContext}</p>
-            </div>
-          )}
-        </motion.section>
-
-        <section className={styles.detailGrid}>
-          <div className={styles.panel}>
-            <h2><FiTarget /> Requirements</h2>
-            <ul>
-              {(task.requirements || []).map((req) => <li key={req}>{req}</li>)}
-            </ul>
-          </div>
-          <div className={styles.panel}>
-            <h2><FiCheckCircle /> Acceptance criteria</h2>
-            <ul>
-              {(task.acceptanceCriteria || []).map((criteria) => <li key={criteria}>{criteria}</li>)}
-            </ul>
-          </div>
-          <div className={styles.panel}>
-            <h2><FiShield /> Evaluator lens</h2>
-            <ul>
-              {(task.evaluationCriteria || roleContext?.evaluationCriteria || []).map((criteria) => <li key={criteria}>{criteria}</li>)}
-            </ul>
-          </div>
-        </section>
-
-        {evaluation && (
-          <motion.section
-            className={styles.evaluationCard}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
+          <button 
+            className={styles.sidebarToggleButton} 
+            onClick={() => setSidebarOpen(false)}
+            title="Collapse Sidebar"
           >
-            <div className={styles.evaluationHeader}>
-              <div>
-                <span>AI Evaluator</span>
-                <h2>Review complete</h2>
-              </div>
-              <div className={styles.scoreCircle}>
-                <strong>{evaluation.score}</strong>
-                <span>/10</span>
-              </div>
-            </div>
+            <FiChevronLeft size={20} />
+          </button>
+        </div>
 
-            <p className={styles.feedback}>{evaluation.feedback}</p>
-
-            <div className={styles.reviewGrid}>
-              <div>
-                <h3>Strengths</h3>
-                {(evaluation.strengths || []).map((item) => <span key={item}>{item}</span>)}
+        <div className={styles.tabContent}>
+          {activeTab === 'description' && (
+            <motion.div 
+              className={styles.tabPane}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className={styles.taskTopline}>
+                <span className={styles.categoryBadge}>{task.category}</span>
+                <span className={styles.deadlineBadge}><FiClock /> {task.deadline}</span>
               </div>
-              <div>
-                <h3>Weaknesses</h3>
-                {(evaluation.weaknesses || []).map((item) => <span key={item}>{item}</span>)}
+              <div className={styles.taskHeader}>
+                <h1>{task.title}</h1>
+                <span className={`${styles.difficulty} ${
+                  task.difficulty?.toLowerCase() === 'easy' ? styles.difficultyEasy :
+                  task.difficulty?.toLowerCase() === 'medium' ? styles.difficultyMedium :
+                  styles.difficultyHard
+                }`}>{task.difficulty}</span>
               </div>
-              <div>
-                <h3>Suggestions</h3>
-                {(evaluation.suggestions || []).map((item) => <span key={item}>{item}</span>)}
+              <p className={styles.description}>{task.description}</p>
+              {task.businessContext && (
+                <div className={styles.contextBox}>
+                  <strong>Business Context</strong>
+                  <p>{task.businessContext}</p>
+                </div>
+              )}
+
+              {/* Core Evaluation Metrics checklist */}
+              <div className={styles.panel} style={{ padding: '0.75rem 0' }}>
+                <h2 style={{ fontSize: '0.95rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <FiShield /> Core Evaluation Metrics
+                </h2>
+                <p className={styles.panelMutedText}>These are the key criteria your manager will use to judge your submission:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {(task.evaluationCriteria || roleContext?.evaluationCriteria || []).map((criteria, i) => (
+                    <div key={i} className={styles.checklistRow}>
+                      <span style={{ color: 'var(--role-accent, #38bdf8)', marginRight: '0.2rem' }}>•</span>
+                      <label style={{ cursor: 'default' }}>{criteria}</label>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className={styles.skillBadges}>
-              {Object.entries(skillDeltas).map(([skill, delta]) => (
-                <span key={skill}>{skill.replace(/([A-Z])/g, ' $1')} {Number(delta) >= 0 ? '+' : ''}{delta}</span>
-              ))}
-            </div>
-          </motion.section>
-        )}
+              {/* Related/Target Skill badging at the bottom of description tab */}
+              {task.skills && task.skills.length > 0 && (
+                <div style={{ marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                  <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 'bold', display: 'block', marginBottom: '0.4rem' }}>
+                    Target Skills
+                  </span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                    {task.skills.map((skill, i) => (
+                      <span key={i} style={{
+                        fontSize: '0.7rem',
+                        fontWeight: '600',
+                        color: 'var(--role-accent, #38bdf8)',
+                        background: 'rgba(56, 189, 248, 0.08)',
+                        border: '1px solid rgba(56, 189, 248, 0.15)',
+                        padding: '0.15rem 0.5rem',
+                        borderRadius: '4px'
+                      }}>
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
 
-        <div className={styles.chatWrapper}>
-          <Chatbot key={`${task._id}-${task.role}`} roleId={task.role} teammate={roleContext?.teammate} />
+          {activeTab === 'requirements' && (
+            <motion.div 
+              className={styles.tabPane}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className={styles.panel} style={{ padding: 0 }}>
+                <h2><FiTarget /> Task Requirements</h2>
+                <p className={styles.panelMutedText}>Check off tasks as you satisfy them in your workspace:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  {(task.requirements || []).map((req, i) => {
+                    const isChecked = !!checkedRequirements[i];
+                    return (
+                      <div key={i} className={`${styles.checklistRow} ${isChecked ? styles.checklistRowChecked : ''}`}>
+                        <input
+                          type="checkbox"
+                          id={`req-${i}`}
+                          checked={isChecked}
+                          onChange={(e) => setCheckedRequirements(prev => ({ ...prev, [i]: e.target.checked }))}
+                        />
+                        <label htmlFor={`req-${i}`}>{req}</label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'acceptance' && (
+            <motion.div 
+              className={styles.tabPane}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className={styles.panel} style={{ padding: 0 }}>
+                <h2><FiCheckCircle /> Acceptance Criteria</h2>
+                <p className={styles.panelMutedText}>Ensure all quality guidelines are met prior to submit:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  {(task.acceptanceCriteria || []).map((crit, i) => {
+                    const isChecked = !!checkedAcceptance[i];
+                    return (
+                      <div key={i} className={`${styles.checklistRow} ${isChecked ? styles.checklistRowChecked : ''}`}>
+                        <input
+                          type="checkbox"
+                          id={`crit-${i}`}
+                          checked={isChecked}
+                          onChange={(e) => setCheckedAcceptance(prev => ({ ...prev, [i]: e.target.checked }))}
+                        />
+                        <label htmlFor={`crit-${i}`}>{crit}</label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'evaluator' && (
+            <motion.div 
+              className={styles.tabPane}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {evaluation ? (
+                <div className={styles.evaluationCard} style={{ padding: 0, background: 'transparent', border: 0 }}>
+                  <div className={styles.evaluationHeader} style={{ padding: '0.5rem 0 1rem 0' }}>
+                    <div>
+                      <span>AI Evaluator</span>
+                      <h2>Review Complete</h2>
+                    </div>
+                    <div className={styles.scoreCircle}>
+                      <strong>{evaluation.score}</strong>
+                      <span>/10</span>
+                    </div>
+                  </div>
+
+                  <p className={styles.feedback}>{evaluation.feedback}</p>
+
+                  <div className={styles.reviewGrid}>
+                    <div className={styles.strengthBox}>
+                      <h3>Strengths</h3>
+                      {(evaluation.strengths || []).map((item, i) => <span key={i}>{item}</span>)}
+                    </div>
+                    <div className={styles.weaknessBox}>
+                      <h3>Weaknesses</h3>
+                      {(evaluation.weaknesses || []).map((item, i) => <span key={i}>{item}</span>)}
+                    </div>
+                    <div className={styles.suggestionBox}>
+                      <h3>Suggestions</h3>
+                      {(evaluation.suggestions || []).map((item, i) => <span key={i}>{item}</span>)}
+                    </div>
+                  </div>
+
+                  <div className={styles.skillBadges}>
+                    {Object.entries(skillDeltas).map(([skill, delta]) => (
+                      <span key={skill}>{skill.replace(/([A-Z])/g, ' $1')} {Number(delta) >= 0 ? '+' : ''}{delta}</span>
+                    ))}
+                  </div>
+
+                  {evaluation.learningRecommendations && evaluation.learningRecommendations.length > 0 && (
+                    <div className={styles.learningRecommendationsSection}>
+                      <h3>Recommended Learning</h3>
+                      <div className={styles.learningRecommendationsList}>
+                        {evaluation.learningRecommendations.map((rec, i) => (
+                          <div key={i} className={styles.learningCard}>
+                            <div className={styles.learningCardHeader}>
+                              <span className={rec.type === 'weakness' ? styles.badgeWeakness : styles.badgeSuggestion}>
+                                {rec.type === 'weakness' ? 'Focus Area' : 'Suggestion'}
+                              </span>
+                            </div>
+                            <p>{rec.text}</p>
+                            {rec.courseUrl && (
+                              <a 
+                                href={rec.courseUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className={styles.learningLink}
+                              >
+                                Explore Course: {rec.courseTitle || 'Learn More'}
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className={styles.emptyEvaluationState}>
+                  <FiShield size={36} />
+                  <h3>Awaiting Submission</h3>
+                  <p>Submit your solution inside the workspace on the right to receive full AI evaluator scores, strength/weakness logs, and personalized recommendations.</p>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {activeTab === 'teammate' && (
+            <motion.div 
+              className={styles.tabPane}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+            >
+              <div className={styles.chatWrapper} style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <Chatbot key={`${task._id}-${task.role}`} roleId={task.role} teammate={roleContext?.teammate} />
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
+      {sidebarOpen && (
+        <div 
+          className={styles.resizerBar} 
+          onMouseDown={startResizing}
+          title="Drag to resize instructions pane"
+        />
+      )}
+
       <div className={styles.rightPane}>
         <div className={styles.editorHeader}>
-          <div>
-            <span>Submission workspace</span>
-            <h2>{task.role?.replaceAll('_', ' ')}</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {!sidebarOpen && (
+              <button 
+                className={styles.sidebarExpandButton}
+                onClick={() => setSidebarOpen(true)}
+                title="Show Instructions"
+              >
+                <FiChevronRight /> <span>Instructions</span>
+              </button>
+            )}
+            <div>
+              <span>Submission workspace</span>
+              <h2>{task.role?.replaceAll('_', ' ')}</h2>
+            </div>
           </div>
           <button
             className={styles.submitButton}

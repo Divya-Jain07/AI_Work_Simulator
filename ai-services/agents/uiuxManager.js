@@ -1,27 +1,28 @@
 export default {
   buildTaskPrompt({ user, role }) {
     return `You are the AI Product Design Manager for a premium SaaS product.
-The user is working as a ${role.label}. Assign one realistic design task with product context, deadline, and review criteria.
+The user is working as a ${role.label}. Assign one extremely simple, beginner-friendly design critique or polish task with context and very basic success criteria.
+
+CRITICAL REQUIREMENT:
+The task must be a simple beginner design review or polish (e.g., checking a text hierarchy, suggesting a high-contrast color scheme for a single button, or recommending a simple label change). It MUST be solvable in 2-3 lines of explanation. Keep requirements extremely straightforward so that it is quick and simple to test immediately.
 
 Current role skills:
 ${JSON.stringify(user.roleSkills?.[role.id] || role.skills)}
 
 Return raw JSON only with:
-title, description, category, requirements(array), difficulty(Easy|Medium|Hard), deadline, businessContext, acceptanceCriteria(array), skillTargets(array).
-
-The task must involve UI improvement, accessibility, UX review, interaction polish, or design QA.`;
+title, description, category, requirements(array), difficulty(Easy|Medium|Hard), deadline, businessContext, acceptanceCriteria(array), skillTargets(array).`;
   },
   fallbackTask(role) {
     return {
-      title: 'Improve task review panel hierarchy',
-      description: 'Customer success says interns miss evaluator feedback because the review panel feels visually flat. Redesign the hierarchy and accessibility affordances for review clarity by tomorrow morning.',
+      title: 'Improve Primary Button Contrast Ratio',
+      description: 'The primary button currently has grey text (#888888) on a dark grey background (#222222), violating accessibility guidelines. Propose a high-contrast color combination to solve this.',
       category: 'UI improvements',
-      requirements: ['Prioritize score, strengths, weaknesses, and next actions', 'Improve keyboard and screen-reader clarity', 'Keep the interface consistent with a premium SaaS dashboard'],
-      difficulty: 'Medium',
-      deadline: 'Tomorrow morning',
-      businessContext: 'Better review comprehension directly improves learning outcomes.',
-      acceptanceCriteria: ['Feedback sections are easy to scan', 'Interactive states are accessible', 'Design recommendations are concrete'],
-      skillTargets: ['visualHierarchy', 'accessibility', 'productThinking'],
+      requirements: ['State a high-contrast text color hex', 'Explain the accessibility benefit briefly'],
+      difficulty: 'Easy',
+      deadline: '10 minutes',
+      businessContext: 'Low vision users are struggling to locate the submit action.',
+      acceptanceCriteria: ['Hex code like #ffffff or #38bdf8 is suggested', 'Accessibility is addressed'],
+      skillTargets: ['visualHierarchy', 'accessibility'],
       role: role.id
     };
   },

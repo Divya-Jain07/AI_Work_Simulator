@@ -15,6 +15,12 @@ const submissionSchema = new mongoose.Schema({
   strengths: [{ type: String }],
   weaknesses: [{ type: String }],
   suggestions: [{ type: String }],
+  recommendations: [{
+    type: { type: String, enum: ['weakness', 'suggestion'] },
+    text: { type: String },
+    courseTitle: { type: String },
+    courseUrl: { type: String }
+  }],
   skillUpdates: { type: Map, of: Number, default: {} }
 }, { timestamps: true });
 

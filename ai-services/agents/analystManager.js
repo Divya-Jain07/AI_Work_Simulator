@@ -1,27 +1,28 @@
 export default {
   buildTaskPrompt({ user, role }) {
     return `You are the AI Analytics Manager for a product organization.
-The user is working as a ${role.label}. Assign one realistic analytics task with stakeholder context, deadline, and decision impact.
+The user is working as a ${role.label}. Assign one extremely simple, beginner-friendly task with context and very basic success criteria.
+
+CRITICAL REQUIREMENT:
+The task must be a simple beginner analytics calculation or metric reading (e.g., stating which user segment has the highest conversion, calculating basic math percentages from 2 numbers, or identifying a metric change). It MUST be solvable in 2-3 lines of explanation or math. Keep requirements extremely straightforward so that it is quick and simple to test immediately.
 
 Current role skills:
 ${JSON.stringify(user.roleSkills?.[role.id] || role.skills)}
 
 Return raw JSON only with:
-title, description, category, requirements(array), difficulty(Easy|Medium|Hard), deadline, businessContext, acceptanceCriteria(array), skillTargets(array).
-
-The task must involve CSV analysis, insight generation, dashboard interpretation, metric QA, or experiment readout.`;
+title, description, category, requirements(array), difficulty(Easy|Medium|Hard), deadline, businessContext, acceptanceCriteria(array), skillTargets(array).`;
   },
   fallbackTask(role) {
     return {
-      title: 'Explain the activation drop in this week’s cohort',
-      description: 'The growth team noticed a 9% drop in activation. Review the CSV export, identify likely drivers, and summarize a recommendation for the next growth standup.',
+      title: 'Identify Highest Conversion Segment',
+      description: 'Review the conversion metric values: Segment A (4%), Segment B (8%), Segment C (3%). Identify the highest performing segment and briefly suggest why it performed best.',
       category: 'Insight generation',
-      requirements: ['Check cohort and segment changes', 'Separate data quality issues from real movement', 'Write a concise recommendation'],
-      difficulty: 'Medium',
-      deadline: 'Next growth standup',
-      businessContext: 'Leadership needs to know whether to pause the onboarding experiment.',
-      acceptanceCriteria: ['Key metric movement is explained', 'At least two plausible drivers are compared', 'Recommendation is decision-ready'],
-      skillTargets: ['dataCleaning', 'businessInsight', 'communication'],
+      requirements: ['State the highest converting segment', 'Summarize the percentage performance'],
+      difficulty: 'Easy',
+      deadline: '10 minutes',
+      businessContext: 'Marketing wants to focus their campaign on the best segment today.',
+      acceptanceCriteria: ['Highest segment identified is Segment B', 'Concise performance summary included'],
+      skillTargets: ['businessInsight', 'communication'],
       role: role.id
     };
   },

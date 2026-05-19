@@ -15,7 +15,7 @@ export const assignTask = async (req, res) => {
 export const chatTeammate = async (req, res) => {
   try {
     const { history, message, roleId } = req.body;
-    const role = roleId ? buildRoleContext(req.user, roleId).activeRole : getUserRole(req.user);
+    const role = roleId ? (await buildRoleContext(req.user, roleId)).activeRole : getUserRole(req.user);
     const manager = getManagerForRole(role.id);
     const reply = await aiService.chatWithRoleTeammate({
       history,
