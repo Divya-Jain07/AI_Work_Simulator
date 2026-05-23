@@ -1,24 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Colors - Light Theme */
-  --bg-main: #020617;
-  --bg-card: rgba(15, 23, 42, 0.78);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #eff6ff;
-  --border: rgba(148, 163, 184, 0.16);
+  /* Colors - Light Theme (LinkedIn Aesthetic) */
+  --bg-main: #f3f2ef;
+  --bg-card: #ffffff;
+  --text-main: #191919;
+  --text-muted: #5e5e5e;
+  --primary: #0a66c2;
+  --primary-hover: #004182;
+  --primary-light: #ebf4fe;
+  --border: #dcdedd;
   
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
+  --success: #057642;
+  --warning: #b24020;
+  --error: #d11124;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
 
   /* Border Radius */
   --radius-sm: 0.375rem;
@@ -31,12 +31,15 @@
 }
 
 [data-theme='dark'] {
-  --bg-main: #0f172a;
-  --bg-card: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: #334155;
-  --primary-light: #1e3a8a;
+  /* Colors - Dark Theme (LinkedIn Aesthetic) */
+  --bg-main: #1b1f23;
+  --bg-card: #292e33;
+  --text-main: #e1e9ee;
+  --text-muted: #b2b2b2;
+  --primary: #70b5f9;
+  --primary-hover: #a8d1fd;
+  --primary-light: rgba(112, 181, 249, 0.15);
+  --border: #3d4348;
 }
 
 * {
@@ -104,7 +107,7 @@ button {
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.2);
 }
 
 .btn-outline {
@@ -131,7 +134,7 @@ button {
 .input-field:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.1);
 }
 
 .label {
@@ -156,7 +159,7 @@ button {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: #020617;
-  color: #f8fafc;
+  background: var(--bg-main);
+  color: var(--text-main);
   font-weight: 700;
 }

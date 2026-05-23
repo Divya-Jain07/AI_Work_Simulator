@@ -11,8 +11,8 @@
   gap: 1rem;
   padding: 1.25rem;
   border-radius: 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
 }
 
 .avatar {
@@ -23,18 +23,18 @@
   place-items: center;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #7dd3fc;
-  background: rgba(56, 189, 248, 0.14);
+  color: var(--primary);
+  background: var(--primary-light);
 }
 
 .hero h1 {
-  color: #f8fafc;
+  color: var(--text-main);
   font-size: 1.4rem;
   margin-bottom: 0.2rem;
 }
 
 .hero p {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -45,30 +45,30 @@
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #dbeafe;
-  background: rgba(37, 99, 235, 0.25);
+  color: var(--primary);
+  background: var(--primary-light);
 }
 
 .panel {
   padding: 1.25rem;
   border-radius: 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
 }
 
 .panel h2 {
-  color: #f8fafc;
+  color: var(--text-main);
   font-size: 1rem;
   margin-bottom: 0.5rem;
 }
 
 .panel p {
-  color: #cbd5e1;
+  color: var(--text-main);
   line-height: 1.45;
 }
 
 .muted {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
   font-size: 0.88rem;
 }
 
@@ -79,8 +79,8 @@
   border-radius: 0.5rem;
   font-weight: 700;
   font-size: 0.88rem;
-  color: #020617;
-  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  color: #ffffff;
+  background: var(--primary);
 }
 
 .skills {
@@ -99,19 +99,19 @@
 .skillHeader {
   display: flex;
   justify-content: space-between;
-  color: #cbd5e1;
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
 .bar {
   height: 0.45rem;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.16);
+  background: var(--border);
   overflow: hidden;
 }
 
 .fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #38bdf8, #2563eb);
+  background: var(--primary);
 }

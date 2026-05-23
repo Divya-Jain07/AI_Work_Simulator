@@ -53,8 +53,8 @@ const Landing = () => {
           <Link to="/login" className={styles.loginBtn}>Login</Link>
         </div>
         <Link to="/" className={styles.brand}>
-          <FiCpu />
-          <span>WorkSim AI</span>
+          <span>WorkSim</span>
+          <span className={styles.logoBox}>AI</span>
         </Link>
         <div className={styles.navRight} aria-hidden="true" />
       </nav>

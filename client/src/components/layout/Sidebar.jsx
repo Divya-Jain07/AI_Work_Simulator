@@ -3,7 +3,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { WorkplaceContext } from '../../context/workplaceContextObject';
 import styles from './Layout.module.css';
-import { FiHome, FiBriefcase, FiUser, FiLogOut, FiCpu } from 'react-icons/fi';
+import { FiHome, FiBriefcase, FiUser, FiLogOut } from 'react-icons/fi';
 
 const Sidebar = ({ collapsed }) => {
   const { user, logout } = useContext(AuthContext);
@@ -18,8 +18,16 @@ const Sidebar = ({ collapsed }) => {
   return (
     <div className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ''}`}>
       <div className={styles.logo}>
-        <div className={styles.logoIcon}><FiCpu /></div>
-        {!collapsed && <span>WorkSim AI</span>}
+        <Link to="/" className={styles.brandLink}>
+          {!collapsed ? (
+            <>
+              <span>WorkSim</span>
+              <span className={styles.logoBox}>AI</span>
+            </>
+          ) : (
+            <span className={styles.logoBoxCollapsed}>AI</span>
+          )}
+        </Link>
       </div>
 
       {!collapsed && (

@@ -3,11 +3,8 @@
   min-height: 100vh;
   width: 100%;
   overflow: visible;
-  background:
-    radial-gradient(circle at 18% 8%, rgba(56, 189, 248, 0.13), transparent 28%),
-    radial-gradient(circle at 88% 16%, rgba(244, 114, 182, 0.1), transparent 24%),
-    #020617;
-  color: #f8fafc;
+  background: var(--bg-main);
+  color: var(--text-main);
 }
 .sidebar {
   width: 280px;
@@ -15,8 +12,8 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  background: rgba(2, 6, 23, 0.84);
-  border-right: 1px solid rgba(148, 163, 184, 0.16);
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   padding: 1.2rem;
@@ -59,9 +56,9 @@
 }
 
 .sidebarToggle {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
   width: 2.2rem;
   height: 2.2rem;
   border-radius: 50%;
@@ -73,9 +70,9 @@
 }
 
 .sidebarToggle:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
   transform: scale(1.05);
 }
 
@@ -85,35 +82,54 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-weight: 800;
-  font-size: 1.08rem;
-  margin-bottom: 1rem;
-  color: #f8fafc;
+  margin-bottom: 1.5rem;
 }
 
-.logoIcon {
+.brandLink {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+.logoBox {
+  background: #0a66c2;
+  color: #ffffff !important;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.15rem;
+  margin-left: 0.15rem;
+  font-weight: 850;
+  font-size: 0.95rem;
+  display: inline-flex;
+  line-height: 1;
+}
+
+.logoBoxCollapsed {
+  background: #0a66c2;
+  color: #ffffff !important;
   width: 2.2rem;
   height: 2.2rem;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #38bdf8, #34d399);
-  color: #020617;
-  border-radius: 0.5rem;
-  box-shadow: 0 18px 35px rgba(56, 189, 248, 0.22);
+  border-radius: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 850;
+  font-size: 1.15rem;
 }
 
 .roleSummary {
   padding: 0.9rem;
   border-radius: 0.5rem;
-  background: rgba(15, 23, 42, 0.76);
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: var(--bg-main);
+  border: 1px solid var(--border);
   margin-bottom: 1rem;
 }
 
 .roleSummary span {
   display: block;
-  color: #38bdf8;
+  color: var(--primary);
   font-size: 0.72rem;
   font-weight: 750;
   text-transform: uppercase;
@@ -122,12 +138,12 @@
 .roleSummary strong {
   display: block;
   margin: 0.2rem 0;
-  color: #f8fafc;
+  color: var(--text-main);
   font-size: 1rem;
 }
 
 .roleSummary p {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.78rem;
   line-height: 1.35;
 }
@@ -145,21 +161,21 @@
   gap: 0.75rem;
   padding: 0.72rem 0.8rem;
   border-radius: 0.5rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 650;
   transition: all 0.2s;
   cursor: pointer;
 }
 
 .navItem:hover {
-  background: rgba(30, 41, 59, 0.72);
-  color: #f8fafc;
+  background: var(--bg-main);
+  color: var(--text-main);
 }
 
 .navItemActive {
-  background: rgba(56, 189, 248, 0.12);
-  color: #f8fafc;
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid var(--primary);
 }
 
 .userInfo {
@@ -174,7 +190,7 @@
 }
 
 .sidebarBottom {
-  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  border-top: 1px solid var(--border);
   padding-top: 1rem;
   margin-top: auto;
 }
@@ -184,14 +200,22 @@
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.userInfo:hover {
+  background: var(--bg-main);
 }
 
 .avatar {
   width: 2.35rem;
   height: 2.35rem;
   border-radius: 999px;
-  background: rgba(56, 189, 248, 0.14);
-  color: #7dd3fc;
+  background: var(--primary-light);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -207,7 +231,7 @@
 .userName {
   font-weight: 700;
   font-size: 0.9rem;
-  color: #f8fafc;
+  color: var(--text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -215,7 +239,7 @@
 
 .userRole {
   font-size: 0.74rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .logoutBtn {
@@ -225,15 +249,18 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.65rem;
-  border: 1px solid rgba(248, 113, 113, 0.18);
-  background: rgba(239, 68, 68, 0.08);
-  color: #fecaca;
+  border: 1px solid var(--border);
+  background: var(--bg-main);
+  color: var(--text-main);
   font-weight: 700;
   border-radius: 0.5rem;
+  transition: all 0.2s ease;
 }
 
 .logoutBtn:hover {
-  background: rgba(239, 68, 68, 0.14);
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .mainContent {
@@ -249,26 +276,26 @@
   top: 0;
   z-index: 10;
   min-height: 72px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding: 0 1.4rem;
-  background: rgba(2, 6, 23, 0.56);
+  background: var(--bg-card);
   backdrop-filter: blur(18px);
 }
 
 .topbarEyebrow {
   display: block;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 750;
   text-transform: uppercase;
 }
 
 .topbar h2 {
-  color: #f8fafc;
+  color: var(--text-main);
   font-size: 1rem;
 }
 
@@ -283,10 +310,10 @@
   align-items: center;
   gap: 0.45rem;
   padding: 0.42rem 0.65rem;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  color: #cbd5e1;
-  background: rgba(15, 23, 42, 0.72);
+  color: var(--text-muted);
+  background: var(--bg-main);
   font-size: 0.78rem;
   font-weight: 700;
 }

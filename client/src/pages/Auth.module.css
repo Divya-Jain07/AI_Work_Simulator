@@ -18,17 +18,31 @@
   margin-bottom: 2rem;
 }
 
-.logoIcon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, var(--primary), #8b5cf6);
-  border-radius: var(--radius-lg);
-  margin: 0 auto 1rem;
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  font-size: 1.55rem;
-  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.15);
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.brandLink {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+.logoBox {
+  background: #0a66c2;
+  color: #ffffff !important;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.15rem;
+  margin-left: 0.15rem;
+  font-weight: 850;
+  font-size: 1.1rem;
+  display: inline-flex;
+  line-height: 1;
 }
 
 .authHeader h2 {
@@ -53,14 +67,14 @@
 }
 
 .error {
-  background-color: #fef2f2;
+  background-color: rgba(209, 17, 36, 0.1);
   color: var(--error);
   padding: 0.75rem;
   border-radius: var(--radius-md);
   margin-bottom: 1rem;
   font-size: 0.875rem;
   text-align: center;
-  border: 1px solid #fecaca;
+  border: 1px solid rgba(209, 17, 36, 0.25);
 }
 
 .authFooter {

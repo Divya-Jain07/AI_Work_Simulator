@@ -25,7 +25,12 @@ const Register = () => {
     <div className={styles.authContainer}>
       <div className={`card ${styles.authCard} animate-fade-in`}>
         <div className={styles.authHeader}>
-          <div className={styles.logoIcon}></div>
+          <div className={styles.logoWrapper}>
+            <Link to="/" className={styles.brandLink}>
+              <span>WorkSim</span>
+              <span className={styles.logoBox}>AI</span>
+            </Link>
+          </div>
           <h2>Apply as Intern</h2>
           <p>Join the AI Work Simulator platform</p>
         </div>
