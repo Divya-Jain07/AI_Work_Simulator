@@ -34,8 +34,8 @@
 }
 
 .logoBox {
-  background: #0a66c2;
-  color: #ffffff !important;
+  background: var(--primary);
+  color: white !important;
   padding: 0.15rem 0.35rem;
   border-radius: 0.15rem;
   margin-left: 0.15rem;

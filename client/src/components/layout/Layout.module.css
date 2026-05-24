@@ -95,8 +95,8 @@
 }
 
 .logoBox {
-  background: #0a66c2;
-  color: #ffffff !important;
+  background: var(--primary);
+  color: white !important;
   padding: 0.15rem 0.35rem;
   border-radius: 0.15rem;
   margin-left: 0.15rem;
@@ -107,8 +107,8 @@
 }
 
 .logoBoxCollapsed {
-  background: #0a66c2;
-  color: #ffffff !important;
+  background: var(--primary);
+  color: white !important;
   width: 2.2rem;
   height: 2.2rem;
   border-radius: 0.35rem;
@@ -186,7 +186,7 @@
 }
 
 .userInfo:hover {
-  background: rgba(30, 41, 59, 0.72);
+  background: var(--accent-bg);
 }
 
 .sidebarBottom {
@@ -326,12 +326,12 @@
 }
 
 .connectedDot {
-  background: #22c55e;
-  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+  background: var(--success);
+  box-shadow: 0 0 0 5px rgba(5, 118, 66, 0.14);
 }
 
 .offlineDot {
-  background: #f59e0b;
+  background: var(--warning);
 }
 
 .contentArea {

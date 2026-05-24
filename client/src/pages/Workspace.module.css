@@ -324,7 +324,7 @@
 .submitButton {
   padding: 0.3rem 0.75rem;
   color: #ffffff;
-  background: #22c55e; /* Success green submit button like Leetcode! */
+  background: var(--success);
   font-weight: 600;
   font-size: 0.8rem;
   border-radius: 0.25rem;
@@ -333,7 +333,7 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #16a34a;
+  background: rgba(5, 118, 66, 0.85);
 }
 
 .submitButton:disabled {
@@ -489,7 +489,7 @@
 
 .checklistRow input[type="checkbox"] {
   margin-top: 0.25rem;
-  accent-color: #22c55e; /* Use success green like Leetcode! */
+  accent-color: var(--success);
   cursor: pointer;
   width: 15px;
   height: 15px;

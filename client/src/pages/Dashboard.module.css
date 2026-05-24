@@ -58,12 +58,12 @@
 }
 
 .liveDot {
-  background: #22c55e;
-  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.14);
+  background: var(--success);
+  box-shadow: 0 0 0 5px rgba(5, 118, 66, 0.14);
 }
 
 .offlineDot {
-  background: #f59e0b;
+  background: var(--warning);
 }
 
 .heroActions {
