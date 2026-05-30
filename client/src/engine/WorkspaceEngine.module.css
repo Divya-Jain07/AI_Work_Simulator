@@ -1,0 +1,135 @@
+.engineShell {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  background: #070d18;
+}
+
+.engineShellFocused {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.roleRail {
+  border-right: 1px solid rgba(148, 163, 184, 0.14);
+  background: #08111f;
+  padding: 0.7rem 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.railButton {
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.6);
+  color: #94a3b8;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.railButtonActive {
+  color: #f8fafc;
+  border-color: rgba(56, 189, 248, 0.42);
+  background: rgba(14, 165, 233, 0.14);
+  box-shadow: inset 3px 0 0 #38bdf8;
+}
+
+.workspaceRegion {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.workspaceRegionFocused {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.engineHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.86);
+}
+
+.engineHeader h3 {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #f8fafc;
+}
+
+.engineHeader span {
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.stagePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: fit-content;
+  border-radius: 999px;
+  border: 1px solid rgba(34, 197, 94, 0.24);
+  background: rgba(34, 197, 94, 0.1);
+  color: #bbf7d0;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.stagePill::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+}
+
+.canvas {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.skeleton {
+  height: 100%;
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  background: #08111f;
+}
+
+@media (max-width: 720px) {
+  .engineShell {
+    grid-template-columns: 1fr;
+  }
+
+  .roleRail {
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  }
+}
+
+.skeleton span {
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.08), rgba(148, 163, 184, 0.16), rgba(148, 163, 184, 0.08));
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.45; }
+  50% { opacity: 1; }
+  100% { opacity: 0.45; }
+}

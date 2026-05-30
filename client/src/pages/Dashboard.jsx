@@ -1,6 +1,8 @@
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { WorkplaceContext } from '../context/workplaceContextObject';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiActivity,
@@ -14,26 +16,8 @@ import {
   FiTarget,
   FiZap
 } from 'react-icons/fi';
+import { useDashboardStore } from '../engine/dashboardStore';
 import styles from './Dashboard.module.css';
-
-const widgetCopy = {
-  activeReactIncidents: ['React Incidents', '2', 'Client-side issues under review'],
-  uiQualityScore: ['UI Quality', '84%', 'Visual QA and validation health'],
-  accessibilityDebt: ['A11y Debt', '5', 'Open issues requiring polish'],
-  componentVelocity: ['Component Velocity', '+12%', 'Delivery pace this sprint'],
-  apiHealth: ['API Health', '99.4%', 'Service reliability snapshot'],
-  authRisk: ['Auth Risk', 'Medium', 'Login and permission hot spots'],
-  queryLatency: ['Query Latency', '143ms', 'P95 database response time'],
-  incidentQueue: ['Incident Queue', '3', 'Backend issues waiting triage'],
-  insightPipeline: ['Insight Pipeline', '6', 'Open analysis requests'],
-  dataQuality: ['Data Quality', '91%', 'Confidence across active datasets'],
-  metricConfidence: ['Metric Confidence', 'High', 'Current dashboard trust level'],
-  stakeholderRequests: ['Stakeholder Requests', '4', 'Pending decision readouts'],
-  usabilityBacklog: ['Usability Backlog', '7', 'UX issues needing review'],
-  a11yCoverage: ['A11y Coverage', '78%', 'Screen reader and keyboard readiness'],
-  designSystemFit: ['System Fit', 'Strong', 'Alignment with product patterns'],
-  workflowFriction: ['Workflow Friction', '3', 'Repeated user pain points']
-};
 
 const roleAccent = {
   frontend_developer: styles.frontend,
@@ -57,22 +41,53 @@ const Dashboard = () => {
     activeRoleId,
     requestTask
   } = useContext(WorkplaceContext);
+  const snapshot = useDashboardStore((state) => state.snapshot);
+  const setSnapshot = useDashboardStore((state) => state.setSnapshot);
   const navigate = useNavigate();
 
   const activeRole = roleContext?.activeRole;
   const roleTasks = tasks.filter(t => t.role === activeRoleId);
   const latestTask = roleTasks[0];
   const completedCount = roleTasks.filter((task) => task.status === 'Evaluated').length;
-  const dashboardWidgets = roleContext?.dashboardWidgets || [];
-  const skillEntries = Object.entries(roleContext?.skillGraph || {});
+  const { data: dashboardData } = useQuery({
+    queryKey: ['dashboard-analytics', activeRoleId],
+    queryFn: async () => {
+      const { data } = await axios.get(`http://localhost:5000/api/dashboard?roleId=${activeRoleId}`);
+      return data;
+    },
+    enabled: !!activeRoleId,
+    staleTime: 20_000
+  });
 
-  const taskMix = useMemo(() => {
-    const categories = roleContext?.taskCategories || [];
-    return categories.map((category, index) => ({
-      category,
-      count: tasks.filter((task) => task.category === category).length || (index % 3) + 1
-    }));
-  }, [roleContext?.taskCategories, tasks]);
+  useEffect(() => {
+    if (dashboardData) setSnapshot(dashboardData);
+  }, [dashboardData, setSnapshot]);
+
+  const liveSnapshot = snapshot?.roleId === activeRoleId ? snapshot : dashboardData;
+  const skillEntries = Object.entries(liveSnapshot?.skillGraph || roleContext?.skillGraph || {});
+
+  const taskMix = useMemo(() => (
+    liveSnapshot?.pipelineCards?.length
+      ? liveSnapshot.pipelineCards
+      : Object.entries(roleTasks.reduce((mix, task) => {
+        const category = task.category || 'Uncategorized';
+        mix[category] = (mix[category] || 0) + 1;
+        return mix;
+      }, {})).map(([label, count]) => ({ key: label, label, count }))
+  ), [liveSnapshot, roleTasks]);
+
+  const dashboardWidgets = useMemo(() => (
+    liveSnapshot?.widgets?.length
+      ? liveSnapshot.widgets
+      : [
+        { key: 'activeTasks', label: 'Active tasks', value: roleTasks.length, detail: 'Current assigned task history' },
+        { key: 'evaluatedTasks', label: 'Evaluated', value: completedCount, detail: 'Completed submissions with evaluator scores' },
+        { key: 'openTasks', label: 'Open work', value: Math.max(0, roleTasks.length - completedCount), detail: 'Tasks still affecting dashboard confidence' }
+      ]
+  ), [completedCount, liveSnapshot, roleTasks.length]);
+
+  const recommendations = liveSnapshot?.recommendations || [];
+  const feed = liveSnapshot?.feed?.length ? liveSnapshot.feed : activity;
 
   const handleRequestTask = async () => {
     try {
@@ -178,14 +193,16 @@ const Dashboard = () => {
               <div className={styles.panelHeader}>
                 <div>
                   <span className={styles.eyebrow}>Pipeline Mix</span>
-                  <h2>Task categories now active</h2>
+                  <h2>Task categories from history</h2>
                 </div>
                 <FiLayers />
               </div>
               <div className={styles.categoryGrid}>
-                {taskMix.map((item) => (
-                  <div key={item.category} className={styles.categoryItem}>
-                    <span>{item.category}</span>
+                {taskMix.length === 0 ? (
+                  <div className={styles.emptyState}>No task history yet. Request a task to start pipeline analytics.</div>
+                ) : taskMix.map((item) => (
+                  <div key={item.key || item.label} className={styles.categoryItem}>
+                    <span>{item.label}</span>
                     <strong>{item.count}</strong>
                   </div>
                 ))}
@@ -203,16 +220,13 @@ const Dashboard = () => {
                 <FiBarChart2 />
               </div>
               <div className={styles.widgetList}>
-                {dashboardWidgets.map((widget) => {
-                  const [label, value, detail] = widgetCopy[widget] || [widget, '-', 'Role-specific signal'];
-                  return (
-                    <div key={widget} className={styles.widgetItem}>
-                      <span>{label}</span>
-                      <strong>{value}</strong>
-                      <small>{detail}</small>
-                    </div>
-                  );
-                })}
+                {dashboardWidgets.map((widget) => (
+                  <motion.div key={widget.key} className={styles.widgetItem} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                    <span>{widget.label}</span>
+                    <strong>{widget.value}</strong>
+                    <small>{widget.detail}</small>
+                  </motion.div>
+                ))}
               </div>
             </div>
 
@@ -253,7 +267,8 @@ const Dashboard = () => {
                 <FiActivity />
               </div>
               <div className={styles.recommendations}>
-                {(roleContext?.learningRecommendations || []).map((item, i) => {
+                {recommendations.length === 0 && <small className={styles.muted}>Recommendations appear after real task or evaluation history exists.</small>}
+                {recommendations.map((item, i) => {
                   const text = typeof item === 'string' ? item : item?.text || String(item);
                   const url = typeof item === 'object' ? item?.courseUrl : null;
                   return url ? (
@@ -275,9 +290,9 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className={styles.feedList}>
-                {activity.length === 0 ? (
-                  <small className={styles.muted}>Role changes, assignments, and evaluations will appear here.</small>
-                ) : activity.map((event) => (
+                {feed.length === 0 ? (
+                  <small className={styles.muted}>Task assignments, evaluations, skill changes, and AI actions will appear here.</small>
+                ) : feed.map((event) => (
                   <div key={event.id} className={styles.feedItem}>
                     <strong>{event.title}</strong>
                     <span>{event.detail}</span>

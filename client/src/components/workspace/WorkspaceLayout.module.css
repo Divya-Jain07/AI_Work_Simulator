@@ -1,0 +1,403 @@
+.workspaceFrame {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(56, 189, 248, 0.1), transparent 30%),
+    radial-gradient(circle at 90% 8%, rgba(139, 92, 246, 0.09), transparent 28%),
+    #08111f;
+}
+
+.workspaceFrameSingle {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.tabBarShell {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  min-width: 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(8, 17, 31, 0.88);
+  backdrop-filter: blur(18px);
+}
+
+.tabScroller {
+  display: flex;
+  align-items: stretch;
+  gap: 0.15rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0.25rem 0.4rem 0;
+}
+
+.tabScroller::-webkit-scrollbar {
+  display: none;
+}
+
+.tabButton {
+  position: relative;
+  min-height: 2.45rem;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  padding: 0 0.8rem;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.tabButton:hover {
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+.tabActive {
+  color: #f8fafc;
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(56, 189, 248, 0.22);
+  box-shadow: 0 -8px 28px rgba(56, 189, 248, 0.08);
+}
+
+.tabActive svg {
+  color: #38bdf8;
+}
+
+.activeUnderline {
+  position: absolute;
+  left: 0.55rem;
+  right: 0.55rem;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #8b5cf6);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.55);
+}
+
+.mobileSelect {
+  display: none;
+  width: calc(100% - 1rem);
+  min-height: 2.45rem;
+  margin: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.contentShell {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.panelLayer {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panelHidden {
+  display: none;
+}
+
+.panelActive {
+  display: block;
+  height: 100%;
+}
+
+.panelChrome {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(0.75rem, 1.4vw, 1rem);
+}
+
+.panelGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.8rem;
+}
+
+.largeGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.8fr);
+  gap: 0.85rem;
+  min-height: 100%;
+}
+
+.glassCard {
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.68);
+  box-shadow: 0 18px 44px rgba(2, 6, 23, 0.2);
+  padding: 0.9rem;
+}
+
+.glassCard h3 {
+  margin: 0 0 0.45rem;
+  color: #f8fafc;
+  font-size: 0.9rem;
+}
+
+.glassCard p,
+.glassCard span,
+.glassCard li {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.metricValue {
+  display: block;
+  margin-top: 0.35rem;
+  color: #f8fafc;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 850;
+}
+
+.editorShell {
+  height: 100%;
+  min-height: 320px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.4);
+}
+
+.sqlIde {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) minmax(128px, 24%);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98)),
+    #020617;
+}
+
+.sqlToolbar {
+  min-width: 0;
+  min-height: 3.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+}
+
+.sqlToolbar > div:first-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.sqlToolbar strong {
+  color: #f8fafc;
+  font-size: 0.86rem;
+}
+
+.sqlToolbar span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.sqlActions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.sqlActions button {
+  min-height: 2rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 7px;
+  padding: 0 0.7rem;
+  background: rgba(30, 41, 59, 0.7);
+  color: #dbeafe;
+  font-size: 0.76rem;
+  font-weight: 850;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.sqlActions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(56, 189, 248, 0.42);
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.sqlActions button:last-child {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.12);
+  color: #bbf7d0;
+}
+
+.sqlActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.sqlEditor {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.queryOutput {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background: rgba(8, 13, 24, 0.96);
+}
+
+.outputHeader {
+  min-height: 2.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.outputHeader strong {
+  color: #e2e8f0;
+  font-size: 0.78rem;
+}
+
+.outputHeader span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.tablePreview {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  color: #cbd5e1;
+  font-size: 0.78rem;
+}
+
+.tablePreview th,
+.tablePreview td {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  padding: 0.6rem;
+  text-align: left;
+}
+
+.tablePreview th {
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.statusPill {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  background: rgba(34, 197, 94, 0.1);
+  color: #bbf7d0;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.insightList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.insightItem {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.24);
+  padding: 0.75rem;
+}
+
+.flowRows {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.flowRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.22);
+}
+
+.flowRow i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #38bdf8;
+  box-shadow: 0 0 0 5px rgba(56, 189, 248, 0.1);
+}
+
+@media (max-width: 920px) {
+  .largeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .tabScroller {
+    display: none;
+  }
+
+  .mobileSelect {
+    display: block;
+  }
+
+  .sqlIde {
+    grid-template-rows: auto minmax(320px, 1fr) minmax(150px, auto);
+  }
+
+  .sqlToolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sqlActions {
+    justify-content: flex-start;
+  }
+}

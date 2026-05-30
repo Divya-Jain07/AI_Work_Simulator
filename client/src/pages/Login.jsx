@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { FiCpu } from 'react-icons/fi';
 import styles from './Auth.module.css';
 
 const Login = () => {
@@ -26,6 +27,7 @@ const Login = () => {
         <div className={styles.authHeader}>
           <div className={styles.logoWrapper}>
             <Link to="/" className={styles.brandLink}>
+              <span className={styles.logoIconInline}><FiCpu /></span>
               <span>WorkSim</span>
               <span className={styles.logoBox}>AI</span>
             </Link>

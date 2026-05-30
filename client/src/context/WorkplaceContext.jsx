@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import { AuthContext } from './AuthContext';
 import { WorkplaceContext } from './workplaceContextObject';
 import { DEFAULT_ROLE_ID, ROLE_CATALOG, ROLE_LIST } from '../config/roleCatalog';
+import { useDashboardStore } from '../engine/dashboardStore';
 
 const API_URL = 'http://localhost:5000';
 
@@ -29,6 +30,8 @@ export const WorkplaceProvider = ({ children }) => {
   const [assigning, setAssigning] = useState(false);
   const [switchingRole, setSwitchingRole] = useState(false);
   const [activity, setActivity] = useState([]);
+  const [performance, setPerformance] = useState(null);
+  const applyLiveDashboardSnapshot = useDashboardStore((state) => state.applyLiveSnapshot);
   const socketRef = useRef(null);
   const lastAppliedRoleRef = useRef(null);
 
@@ -49,8 +52,12 @@ export const WorkplaceProvider = ({ children }) => {
 
   const refreshTasks = useCallback(async () => {
     if (!user) return;
-    const { data } = await axios.get(`${API_URL}/api/tasks`);
-    setTasks(data);
+    try {
+      const { data } = await axios.get(`${API_URL}/api/tasks`);
+      setTasks(data);
+    } catch (err) {
+      console.error('Error refreshing tasks:', err);
+    }
   }, [user]);
 
   const loadRoleState = useCallback(async () => {
@@ -65,6 +72,8 @@ export const WorkplaceProvider = ({ children }) => {
         setRoleContext(buildResolvedRoleContext(serverRoleId, data.current));
         await refreshTasks();
       }
+    } catch (err) {
+      console.error('Error loading role state:', err);
     } finally {
       setLoading(false);
     }
@@ -131,23 +140,28 @@ export const WorkplaceProvider = ({ children }) => {
       ));
     });
     socket.on('role:changed', applyRoleContext);
-    socket.on('task:assigned', ({ task, roleContext: context }) => {
+    socket.on('task:assigned', ({ task, roleContext: context, performance: snapshot, activityEvent, dashboardSnapshot }) => {
       if (context?.activeRole?.id) {
         setSelectedRoleId(context.activeRole.id);
         setRoleContext(buildResolvedRoleContext(context.activeRole.id, context));
       }
       if (task) setTasks((current) => upsertById(current, task));
+      if (snapshot) setPerformance(snapshot);
+      if (dashboardSnapshot) applyLiveDashboardSnapshot(dashboardSnapshot);
       pushActivity({
         type: 'task',
-        title: 'AI Manager assigned a new task',
-        detail: task?.title
+        title: activityEvent?.title || 'AI Manager assigned a new task',
+        detail: activityEvent?.detail || task?.title,
+        performance: snapshot
       });
     });
-    socket.on('submission:evaluated', ({ submission, roleContext: context, skillGraph }) => {
+    socket.on('submission:evaluated', ({ submission, roleContext: context, skillGraph, performance: snapshot, activityEvent, dashboardSnapshot }) => {
       if (context?.activeRole?.id) {
         setSelectedRoleId(context.activeRole.id);
         setRoleContext(buildResolvedRoleContext(context.activeRole.id, context));
       }
+      if (snapshot) setPerformance(snapshot);
+      if (dashboardSnapshot) applyLiveDashboardSnapshot(dashboardSnapshot);
       if (submission?.task) {
         setTasks((current) => current.map((task) => (
           task._id === submission.task ? { ...task, status: 'Evaluated', lastEvaluationScore: submission.score } : task
@@ -159,16 +173,20 @@ export const WorkplaceProvider = ({ children }) => {
       });
       pushActivity({
         type: 'evaluation',
-        title: `Evaluator returned ${submission?.score}/10`,
-        detail: submission?.feedback
+        title: activityEvent?.title || `Evaluator returned ${submission?.score}/10`,
+        detail: activityEvent?.detail || submission?.feedback,
+        performance: snapshot
       });
+    });
+    socket.on('dashboard:updated', (snapshot) => {
+      if (snapshot) applyLiveDashboardSnapshot(snapshot);
     });
 
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [applyRoleContext, pushActivity, setUserFromWorkplace, user?.token]);
+  }, [applyLiveDashboardSnapshot, applyRoleContext, pushActivity, setUserFromWorkplace, user?.token]);
 
   const changeRole = useCallback(async (roleId) => {
     if (!roleId || switchingRole) return { ok: false };
@@ -214,6 +232,8 @@ export const WorkplaceProvider = ({ children }) => {
 
       const { data } = await axios.post(`${API_URL}/api/ai/manager/assign`, { roleId: activeRoleId });
       setTasks((current) => upsertById(current, data.task));
+      if (data.performance) setPerformance(data.performance);
+      if (data.dashboardSnapshot) applyLiveDashboardSnapshot(data.dashboardSnapshot);
       if (data.roleContext?.activeRole?.id) {
         setSelectedRoleId(data.roleContext.activeRole.id);
         setRoleContext(buildResolvedRoleContext(data.roleContext.activeRole.id, data.roleContext));
@@ -222,7 +242,7 @@ export const WorkplaceProvider = ({ children }) => {
     } finally {
       setAssigning(false);
     }
-  }, [activeRoleId]);
+  }, [activeRoleId, applyLiveDashboardSnapshot]);
 
   const evaluateTask = useCallback(async ({ taskId, content }) => {
     const socket = socketRef.current;
@@ -236,12 +256,13 @@ export const WorkplaceProvider = ({ children }) => {
     }
 
     const { data } = await axios.post(`${API_URL}/api/ai/evaluator/evaluate`, { taskId, content });
+    if (data.dashboardSnapshot) applyLiveDashboardSnapshot(data.dashboardSnapshot);
     return data;
-  }, []);
+  }, [applyLiveDashboardSnapshot]);
 
   const value = useMemo(() => ({
     roles,
-    roleContext: buildResolvedRoleContext(activeRoleId, roleContext),
+    roleContext: buildResolvedRoleContext(activeRoleId, roleContext || {}),
     activeRoleDefinition,
     tasks,
     connected,
@@ -249,13 +270,14 @@ export const WorkplaceProvider = ({ children }) => {
     assigning,
     switchingRole,
     activity,
+    performance,
     activeRoleId,
     changeRole,
     requestTask,
     evaluateTask,
     refreshTasks,
     setTasks
-  }), [roles, roleContext, activeRoleDefinition, tasks, connected, loading, assigning, switchingRole, activity, activeRoleId, changeRole, requestTask, evaluateTask, refreshTasks]);
+  }), [roles, roleContext, activeRoleDefinition, tasks, connected, loading, assigning, switchingRole, activity, performance, activeRoleId, changeRole, requestTask, evaluateTask, refreshTasks]);
 
   return (
     <WorkplaceContext.Provider value={value}>
@@ -279,12 +301,14 @@ const mergeRoles = (serverRoles = []) => {
 };
 
 const buildResolvedRoleContext = (roleId, serverContext = {}) => {
+  // Guard: default parameter only fires for undefined, not null
+  const ctx = serverContext || {};
   const role = ROLE_CATALOG[roleId] || ROLE_CATALOG[DEFAULT_ROLE_ID];
-  const serverContextMatchesRole = serverContext.activeRole?.id === role.id;
+  const serverContextMatchesRole = ctx.activeRole?.id === role.id;
 
   return {
     activeRole: {
-      ...(serverContextMatchesRole ? serverContext.activeRole : {}),
+      ...(serverContextMatchesRole ? ctx.activeRole : {}),
       id: role.id,
       label: role.label,
       headline: role.headline
@@ -292,19 +316,19 @@ const buildResolvedRoleContext = (roleId, serverContext = {}) => {
     taskCategories: role.taskCategories,
     dashboardWidgets: role.dashboardWidgets,
     teammate: {
-      ...(serverContextMatchesRole ? serverContext.teammate : {}),
+      ...(serverContextMatchesRole ? ctx.teammate : {}),
       name: role.teammateName,
       title: role.teammateTitle
     },
-    evaluationCriteria: serverContextMatchesRole && serverContext.evaluationCriteria?.length
-      ? serverContext.evaluationCriteria
+    evaluationCriteria: serverContextMatchesRole && ctx.evaluationCriteria?.length
+      ? ctx.evaluationCriteria
       : role.evaluationCriteria,
-    learningRecommendations: serverContextMatchesRole && serverContext.learningRecommendations?.length
-      ? serverContext.learningRecommendations
+    learningRecommendations: serverContextMatchesRole && ctx.learningRecommendations?.length
+      ? ctx.learningRecommendations
       : role.learningRecommendations,
     skillGraph: {
       ...role.defaultSkillGraph,
-      ...(serverContextMatchesRole ? serverContext.skillGraph : {})
+      ...(serverContextMatchesRole ? ctx.skillGraph : {})
     }
   };
 };

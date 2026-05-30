@@ -9,8 +9,12 @@
 
 .authCard {
   width: 100%;
-  max-width: 400px;
-  padding: 2.5rem;
+  max-width: 420px;
+  padding: 3rem 2.5rem;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .authHeader {
@@ -45,6 +49,33 @@
   line-height: 1;
 }
 
+.logoIconInline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin-right: 0.5rem;
+  box-shadow: 0 4px 10px rgba(56, 189, 248, 0.25);
+}
+
+.logoIcon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+  border-radius: 14px;
+  margin: 0 auto 1.5rem;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 1.8rem;
+  box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);
+}
+
 .authHeader h2 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
@@ -62,8 +93,22 @@
 
 .submitBtn {
   width: 100%;
-  margin-top: 1rem;
-  padding: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 0.85rem;
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+.submitBtn:hover {
+  background: #7dd3fc;
+  transform: translateY(-1px);
 }
 
 .error {

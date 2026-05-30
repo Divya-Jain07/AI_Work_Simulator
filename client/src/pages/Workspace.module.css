@@ -1,28 +1,31 @@
 .workspace {
   display: flex;
   gap: 0.5rem;
-  height: calc(100vh - 128px); /* Take full remaining height like Leetcode! */
-  min-height: 580px;
+  min-height: calc(100vh - 128px);
+  min-height: calc(100svh - 128px);
+  height: auto;
   width: 100%;
+  max-width: 100%;
   position: relative;
+  overflow: visible;
 }
 
-.leftPane {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  border: 1px solid var(--border);
+  max-width: min(620px, 46vw);
+  border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 0.5rem;
   background: var(--bg-card);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 18px 54px rgba(2, 6, 23, 0.18);
   height: 100%;
+  min-height: calc(100vh - 128px);
+  min-height: calc(100svh - 128px);
   flex-shrink: 0;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition: width 0.3s ease, flex-basis 0.3s ease, opacity 0.2s ease, visibility 0.2s ease, border-color 0.2s ease;
 }
 
 .leftPaneCollapsed {
   width: 0px !important;
+  flex-basis: 0px !important;
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -34,12 +37,47 @@
   flex-direction: column;
   min-width: 0;
   height: 100%;
-  border: 1px solid var(--border);
+  min-height: calc(100vh - 128px);
+  min-height: calc(100svh - 128px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.5rem;
-  background: var(--bg-card);
+  background: #1e1e1e; /* Same integrated Leetcode dark background */
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 22px 70px rgba(2, 6, 23, 0.34);
   flex: 1;
+  min-width: min(100%, 420px);
+}
+
+.workspaceSidebarToggle {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 50;
+  width: 2.45rem;
+  height: 2.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #dbeafe;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.34);
+  backdrop-filter: blur(18px);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.workspaceSidebarToggle:hover {
+  color: #ffffff;
+  border-color: rgba(56, 189, 248, 0.42);
+  background: rgba(30, 41, 59, 0.96);
+  transform: translateY(-1px);
+}
+
+.workspaceSidebarToggle:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
 }
 
 .backButton,
@@ -104,8 +142,8 @@
 }
 
 .taskHeader h1 {
-  color: var(--text-main);
-  font-size: 1.55rem;
+  color: #f8fafc;
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
   line-height: 1.1;
 }
 
@@ -247,7 +285,7 @@
 
 .reviewGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 0.75rem;
 }
 
@@ -289,7 +327,7 @@
 }
 
 .chatWrapper {
-  min-height: 420px;
+  min-height: min(420px, 55vh);
 }
 
 .editorHeader {
@@ -297,43 +335,53 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.35rem 0.75rem;
+  padding: 0.85rem 1.25rem;
   color: #f8fafc;
-  background: #282828; /* Matches Leetcode header! */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  min-height: 42px;
+  background: #10182b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  min-height: 72px;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .editorHeader span {
   display: block;
-  color: #9e9e9e; /* Muted Leetcode gray */
-  font-size: 0.7rem;
+  color: #8fa4be;
+  font-size: 0.72rem;
   text-transform: uppercase;
   font-weight: 700;
+  letter-spacing: 0.09em;
 }
 
 .editorHeader h2 {
-  margin-top: 0.1rem;
-  font-size: 0.8rem;
-  text-transform: capitalize;
-  font-weight: 600;
+  margin-top: 0.25rem;
+  font-size: clamp(1rem, 1.8vw, 1.4rem);
+  text-transform: none;
+  font-weight: 800;
   color: #ffffff;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .submitButton {
-  padding: 0.3rem 0.75rem;
-  color: #ffffff;
-  background: var(--success);
-  font-weight: 600;
-  font-size: 0.8rem;
-  border-radius: 0.25rem;
+  min-height: 3.15rem;
+  padding: 0.75rem 1.2rem;
+  color: #06111d;
+  background: #38bdf8;
+  font-weight: 800;
+  font-size: clamp(0.94rem, 1.5vw, 1.05rem);
+  border-radius: 0.65rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 14px 28px rgba(56, 189, 248, 0.16);
   transition: all 0.2s ease;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .submitButton:hover:not(:disabled) {
-  background: rgba(5, 118, 66, 0.85);
+  background: #4cc9ff;
+  transform: translateY(-1px);
 }
 
 .submitButton:disabled {
@@ -344,6 +392,7 @@
 .editorContainer {
   flex: 1;
   min-height: 0;
+  background: #1f1f1f;
 }
 
 .errorBanner,
@@ -365,7 +414,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem 0.75rem 0.35rem 3.55rem;
   background: #282828; /* Slightly lighter Leetcode header background */
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   min-height: 42px;
@@ -436,8 +485,9 @@
 
 .tabContent {
   flex: 1;
-  overflow-y: auto; /* Scroll only the content, sticky tab header! */
-  padding: 1.25rem;
+  min-height: 0;
+  overflow: auto; /* Scroll only the content, sticky tab header! */
+  padding: clamp(0.85rem, 1.6vw, 1.25rem);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -722,6 +772,201 @@
 }
 
 .sidebarExpandButton:hover {
+  font-size: 0.83rem;
+  margin: -0.25rem 0 0.75rem 0;
+  line-height: 1.45;
+}
+
+/* Empty Evaluation State */
+.emptyEvaluationState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px dashed rgba(148, 163, 184, 0.2);
+  gap: 0.75rem;
+  color: #cbd5e1;
+}
+
+.emptyEvaluationState svg {
+  font-size: 2.2rem;
+  color: #475569;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.emptyEvaluationState h3 {
+  font-size: 1.05rem;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.emptyEvaluationState p {
+  font-size: 0.84rem;
+  color: #94a3b8;
+  max-width: 320px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Sub-card details inside Evaluator Lens */
+.strengthBox h3,
+.weaknessBox h3,
+.suggestionBox h3 {
+  font-size: 0.85rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.35rem;
+}
+
+.strengthBox h3 { color: #86efac; }
+.weaknessBox h3 { color: #fecaca; }
+.suggestionBox h3 { color: #93c5fd; }
+
+/* Dynamic personalized recommendations inside Evaluator Lens tab */
+.learningRecommendationsSection {
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.learningRecommendationsSection h3 {
+  color: #f8fafc;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+}
+
+.learningRecommendationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.learningCard {
+  padding: 0.9rem;
+  border-radius: 0.5rem;
+  background: rgba(30, 41, 59, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.learningCardHeader {
+  display: flex;
+}
+
+.badgeWeakness,
+.badgeSuggestion {
+  font-size: 0.62rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  display: inline-block;
+  letter-spacing: 0.03em;
+}
+
+.badgeWeakness {
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+}
+
+.badgeSuggestion {
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.learningCard p {
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.learningLink {
+  display: inline-flex;
+  align-items: center;
+  color: var(--role-accent, #38bdf8);
+  text-decoration: none;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.375rem;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.learningLink:hover {
+  background: var(--role-accent, #38bdf8);
+  color: #0f172a;
+  transform: translateX(2px);
+}
+
+.resizerBar {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.15s ease;
+  align-self: stretch;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.resizerBar:hover,
+.resizerBar:active {
+  background: var(--role-accent, #38bdf8); /* Lights up in accent color on drag/hover! */
+}
+
+.sidebarToggleButton {
+  background: transparent;
+  border: 0;
+  color: #94a3b8;
+  padding: 0.35rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  transition: all 0.15s ease;
+}
+
+.sidebarToggleButton:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebarExpandButton {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.sidebarExpandButton:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.2);
@@ -729,15 +974,12 @@
 
 .tabButton span {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
   transition: max-width 0.2s ease;
 }
 
 @media (max-width: 1280px) {
   .tabButton span {
-    max-width: 75px; /* Dynamically shrink text on narrower screens! */
+    max-width: none;
   }
 }
 
@@ -745,12 +987,29 @@
   .workspace {
     flex-direction: column;
     height: auto;
+    min-height: 0;
     gap: 1rem;
+    overflow: visible;
   }
   
   .leftPane {
     width: 100% !important;
-    height: 600px;
+    flex-basis: auto !important;
+    max-width: 100%;
+    height: min(560px, 52vh);
+    min-height: 360px;
+  }
+
+  .leftPaneCollapsed {
+    width: 0 !important;
+    flex-basis: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .rightPane {
+    min-width: 0;
+    min-height: min(560px, 62vh);
   }
   
   .resizerBar {
@@ -759,5 +1018,41 @@
 
   .tabButton span {
     display: none; /* Hide labels entirely on mobile, icons only! */
+  }
+}
+
+@media (max-width: 700px) {
+  .leftPane {
+    height: auto;
+    min-height: 0;
+  }
+
+  .paneHeader,
+  .editorHeader {
+    flex-wrap: wrap;
+  }
+
+  .paneHeader {
+    padding-left: 3.55rem;
+  }
+
+  .editorHeader {
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .submitButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reviewGrid,
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreCircle {
+    width: 3.6rem;
+    height: 3.6rem;
   }
 }

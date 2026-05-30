@@ -1,7 +1,10 @@
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: clamp(0.75rem, 1.4vw, 1rem);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .frontend { --role-accent: #0a66c2; --role-soft: rgba(10, 102, 194, 0.12); }
@@ -12,9 +15,9 @@
 .commandCenter {
   display: flex;
   justify-content: space-between;
-  gap: 1.5rem;
-  padding: 1.35rem;
-  border: 1px solid var(--border);
+  gap: clamp(0.85rem, 2vw, 1.5rem);
+  padding: clamp(0.9rem, 2vw, 1.35rem);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 0.5rem;
   background:
     linear-gradient(135deg, var(--bg-card), var(--bg-card)),
@@ -25,8 +28,8 @@
 .heroCopy h1 {
   max-width: 760px;
   margin: 0.7rem 0 0.45rem;
-  color: var(--text-main);
-  font-size: clamp(1.85rem, 4vw, 3.3rem);
+  color: #f8fafc;
+  font-size: clamp(1.45rem, 3vw, 3rem);
   line-height: 1;
   font-weight: 750;
 }
@@ -67,7 +70,7 @@
 }
 
 .heroActions {
-  min-width: 270px;
+  min-width: min(100%, 240px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -123,7 +126,7 @@
 
 .roleSwitcher {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 0.75rem;
 }
 
@@ -160,8 +163,9 @@
 
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(330px, 0.85fr);
+  grid-template-columns: minmax(0, 1.7fr) minmax(260px, 0.8fr);
   gap: 1rem;
+  min-width: 0;
 }
 
 .mainColumn,
@@ -173,7 +177,7 @@
 
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 0.75rem;
 }
 
@@ -204,11 +208,13 @@
 .metricCard strong {
   display: block;
   margin-top: 0.2rem;
-  font-size: 1.4rem;
+  font-size: clamp(1.05rem, 2vw, 1.4rem);
+  overflow-wrap: anywhere;
 }
 
 .panel {
-  padding: 1rem;
+  padding: clamp(0.8rem, 1.5vw, 1rem);
+  min-width: 0;
 }
 
 .panelHeader {
@@ -249,7 +255,7 @@
 .taskItem {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) max-content;
   gap: 1rem;
   text-align: left;
   padding: 1rem;
@@ -314,7 +320,7 @@
 }
 
 .categoryGrid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
 
 .categoryItem,
@@ -524,6 +530,10 @@
     grid-template-columns: 1fr;
   }
 
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
   .commandCenter {
     flex-direction: column;
   }
@@ -532,15 +542,21 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .categoryGrid {
+  .sideColumn {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 760px) {
+  .commandCenter {
+    flex-direction: column;
+  }
+
   .metricsGrid,
   .roleSwitcher,
-  .categoryGrid {
+  .categoryGrid,
+  .sideColumn {
     grid-template-columns: 1fr;
   }
 

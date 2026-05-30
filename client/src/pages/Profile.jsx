@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { WorkplaceContext } from '../context/workplaceContextObject';
@@ -11,7 +11,13 @@ const formatSkill = (skill) => skill
 const Profile = () => {
   const { user } = useContext(AuthContext);
   const { roleContext } = useContext(WorkplaceContext);
+  const [theme, setTheme] = useState(() => localStorage.getItem('workspace_theme') || 'dark');
   const skillEntries = Object.entries(roleContext?.skillGraph || {});
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('workspace_theme', theme);
+  }, [theme]);
 
   return (
     <div className={styles.profile}>
@@ -31,6 +37,31 @@ const Profile = () => {
           Teammate: {roleContext?.teammate?.name} · {roleContext?.teammate?.title}
         </p>
         <Link to="/choose-role?switch=1" className={styles.linkBtn}>Switch role</Link>
+      </section>
+
+      <section className={styles.panel}>
+        <div className={styles.settingHeader}>
+          <div>
+            <h2>Theme</h2>
+            <p className={styles.muted}>Choose how the workspace appears on this device.</p>
+          </div>
+          <div className={styles.themeToggle} role="group" aria-label="Theme selection">
+            <button
+              type="button"
+              className={theme === 'dark' ? styles.themeActive : ''}
+              onClick={() => setTheme('dark')}
+            >
+              Dark
+            </button>
+            <button
+              type="button"
+              className={theme === 'light' ? styles.themeActive : ''}
+              onClick={() => setTheme('light')}
+            >
+              Light
+            </button>
+          </div>
+        </div>
       </section>
 
       <section className={styles.panel}>

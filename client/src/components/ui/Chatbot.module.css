@@ -2,20 +2,27 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: rgba(15, 23, 42, 0.74);
-  border-radius: 0.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
   overflow: hidden;
+  box-shadow: 0 10px 30px -10px rgba(2, 6, 23, 0.7);
 }
 
 .chatHeader {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-  font-weight: 600;
-  background: rgba(30, 41, 59, 0.6);
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(30, 41, 59, 0.45);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .teammateIdentity {
@@ -23,32 +30,89 @@
   flex-direction: column;
 }
 
-.teammateIdentity span {
+.teammateName {
   color: #f8fafc;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-.teammateIdentity small {
+.teammateTitle {
   color: #94a3b8;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 500;
+  margin-top: 1px;
 }
 
 .statusDot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--success);
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  transition: all 0.3s ease;
+}
+
+.statusDotActive {
+  background-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  animation: pulseGreen 2s infinite;
+}
+
+.statusDotTyping {
+  background-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+  animation: pulseBlue 1.2s infinite;
+}
+
+.statusDotOffline {
+  background-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.onlineText {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .messagesArea {
   flex: 1;
-  padding: 1rem;
+  padding: 1.25rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+}
+
+/* Custom scrollbar for premium look */
+.messagesArea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messagesArea::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+}
+
+.messagesArea::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
 }
 
 .messageWrapper {
@@ -65,76 +129,100 @@
 }
 
 .messageBubble {
-  max-width: 85%;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-lg);
-  font-size: 0.9rem;
-  line-height: 1.4;
+  max-width: 82%;
+  padding: 0.8rem 1.1rem;
+  border-radius: 14px;
+  font-size: 0.92rem;
+  line-height: 1.5;
   white-space: pre-wrap;
+  box-shadow: 0 2px 8px -2px rgba(2, 6, 23, 0.4);
 }
 
 .userBubble {
-  background: #38bdf8;
-  color: #020617;
-  border-bottom-right-radius: 0.25rem;
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+  color: #030712;
+  font-weight: 500;
+  border-bottom-right-radius: 2px;
 }
 
 .modelBubble {
-  background: var(--bg-card);
-  color: var(--text-main);
-  border: 1px solid var(--border);
-  border-bottom-left-radius: 0.25rem;
+  background: rgba(30, 41, 59, 0.6);
+  color: #f1f5f9;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-bottom-left-radius: 2px;
+}
+
+.errorBubble {
+  border-color: rgba(249, 115, 22, 0.35);
+  background: rgba(67, 30, 16, 0.5);
+  color: #fed7aa;
 }
 
 .inputArea {
   display: flex;
-  padding: 1rem;
-  border-top: 1px solid var(--border);
-  background: var(--bg-card);
-  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.95);
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .chatInput {
   flex: 1;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  background: var(--bg-main);
-  color: var(--text-main);
+  padding: 0.65rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(30, 41, 59, 0.5);
+  color: #f8fafc;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .chatInput:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: #38bdf8;
+  background: rgba(30, 41, 59, 0.8);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
 }
 
 .sendBtn {
   background: #38bdf8;
-  color: #020617;
+  color: #0f172a;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 750;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: #0ea5e9;
+  transform: translateY(-1px);
+}
+
+.sendBtn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .sendBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .typingIndicator {
   display: flex;
-  gap: 0.25rem;
-  padding: 1rem;
+  gap: 0.35rem;
+  padding: 0.8rem 1.1rem;
   align-items: center;
 }
 
 .typingIndicator span {
   width: 6px;
   height: 6px;
-  background-color: var(--text-muted);
+  background-color: #94a3b8;
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out both;
 }
@@ -143,6 +231,18 @@
 .typingIndicator span:nth-child(2) { animation-delay: -0.16s; }
 
 @keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
+  0%, 80%, 100% { transform: scale(0.3); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulseGreen {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes pulseBlue {
+  0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(56, 189, 248, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
 }

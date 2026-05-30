@@ -15,7 +15,8 @@ Return raw JSON only with these keys:
 - weaknesses: array of strings
 - suggestions: array of strings
 - feedback: string
-- skillUpdates: object of numeric deltas
+- skills: object of numeric 0-10 analytics by role skill
+- skillUpdates: object of numeric growth deltas
 - recommendations: array of objects. Each object represents a key learning step mapping to the weaknesses or suggestions and must contain:
   - type: string, either "weakness" or "suggestion"
   - text: string, the description of the weakness or suggestion
@@ -26,6 +27,7 @@ Return raw JSON only with these keys:
   fallbackEvaluation() {
     return {
       score: 8,
+      skills: { apiDesign: 8, authentication: 7, reliability: 7, communication: 7 },
       strengths: ['Good API contract awareness', 'Security implications are addressed'],
       weaknesses: ['Database and logging impact could be clearer'],
       suggestions: ['Add explicit authorization checks and document expected failure responses'],
