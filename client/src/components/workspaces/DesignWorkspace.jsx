@@ -33,7 +33,7 @@ const resolveScene = (task) => {
   if (text.includes('nav') || text.includes('navigation') || text.includes('menu') || text.includes('sidebar')) return 'navigation';
   if (text.includes('form') || text.includes('input') || text.includes('field') || text.includes('label')) return 'form';
   if (text.includes('landing') || text.includes('hero') || text.includes('homepage') || text.includes('home page')) return 'landing';
-  
+
   if (text.includes('button') || text.includes('contrast') || text.includes('cta') || text.includes('primary action') || text.includes('save changes') || text.includes('submit')) return 'settings';
   if (text.includes('profile') || text.includes('account') || text.includes('user setting') || text.includes('preference')) return 'settings';
 
@@ -225,7 +225,7 @@ const DashboardMockup = ({ task }) => (
                 <div key={i} className={styles.sceneDashBar} style={{ height: `${h}%` }} />
               ))}
             </div>
-            <div className={styles.sceneDashBarLabels}>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => <span key={d}>{d}</span>)}</div>
+            <div className={styles.sceneDashBarLabels}>{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <span key={d}>{d}</span>)}</div>
           </div>
           <div className={styles.sceneDashTable}>
             <div className={styles.sceneDashTableTitle}>Top Pages</div>
@@ -245,7 +245,7 @@ const ModalMockup = ({ task }) => (
     <div className={styles.sceneModalBg}>
       <div className={styles.sceneNav}><div className={styles.sceneNavLogo}>AppName</div></div>
       <div style={{ padding: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-        {[1,2,3,4,5,6].map(i => <div key={i} style={{ height: 80, background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }} />)}
+        {[1, 2, 3, 4, 5, 6].map(i => <div key={i} style={{ height: 80, background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }} />)}
       </div>
     </div>
     {/* Overlay */}
@@ -303,7 +303,7 @@ const NavigationMockup = ({ task }) => (
     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div style={{ height: 120, background: 'rgba(99,102,241,0.08)', borderRadius: 12, border: '1px solid rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '0.75rem' }}>Hero Section (below nav)</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-        {[1,2,3].map(i => <div key={i} style={{ height: 64, background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }} />)}
+        {[1, 2, 3].map(i => <div key={i} style={{ height: 64, background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }} />)}
       </div>
     </div>
   </div>
@@ -343,7 +343,7 @@ const LandingMockup = ({ task }) => (
     </div>
     <div className={styles.sceneLandingHero}>
       <div className={styles.sceneLandingBadge}>✦ Now in public beta</div>
-      <div className={styles.sceneLandingTitle}>Design systems<br/>that scale.</div>
+      <div className={styles.sceneLandingTitle}>Design systems<br />that scale.</div>
       <div className={styles.sceneLandingSubtitle}>The all-in-one platform for teams who care about craft, consistency, and shipping with confidence.</div>
       <div className={styles.sceneLandingCtas}>
         <div className={styles.scenePrimaryBtn}>Start for free →</div>
@@ -418,14 +418,14 @@ export const DesignWorkspace = ({ value, onChange, task }) => {
   const submitComment = async (id) => {
     if (!draftComment.trim()) return;
     const userMessage = draftComment;
-    
+
     setPins(curr => curr.map(p => p.id === id ? { ...p, text: userMessage } : p));
     setDraftComment('');
 
     try {
       const contextMessage = `[Design Task Context: ${task?.title || ''} - ${task?.description || ''}]. The user left a design comment: "${userMessage}". Please reply directly to this comment as an AI teammate. Ask for plain text - no formatting.`;
-      
-      const { data } = await axios.post('http://localhost:5000/api/ai/teammate/chat', {
+
+      const { data } = await axios.post('/api/ai/teammate/chat', {
         history: [],
         message: contextMessage,
         roleId: task?.role

@@ -45,7 +45,7 @@ const Chatbot = ({ taskId, roleId, teammate }) => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('http://localhost:5000/api/ai/teammate/chat', {
+      const { data } = await axios.post('/api/ai/teammate/chat', {
         history: messages,
         message: userMessage,
         roleId
@@ -70,7 +70,7 @@ const Chatbot = ({ taskId, roleId, teammate }) => {
           <small>{teammate?.title || 'Role-aware collaborator'}</small>
         </div>
       </div>
-      
+
       <div className={styles.messagesArea}>
         {messages.map((msg, index) => (
           <div key={index} className={`${styles.messageWrapper} ${msg.role === 'user' ? styles.userWrapper : styles.modelWrapper}`}>
@@ -90,11 +90,11 @@ const Chatbot = ({ taskId, roleId, teammate }) => {
       </div>
 
       <form onSubmit={handleSend} className={styles.inputArea}>
-        <input 
-          type="text" 
+        <input
+          type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask for help or guidance..." 
+          placeholder="Ask for help or guidance..."
           className={styles.chatInput}
           disabled={loading}
         />

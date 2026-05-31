@@ -5,7 +5,7 @@ import { AuthContext } from './AuthContext';
 import { WorkplaceContext } from './workplaceContextObject';
 import { DEFAULT_ROLE_ID, ROLE_CATALOG, ROLE_LIST } from '../config/roleCatalog';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const upsertById = (items, item) => {
   if (!item?._id) return items;

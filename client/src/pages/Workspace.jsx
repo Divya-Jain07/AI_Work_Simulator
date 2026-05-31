@@ -94,11 +94,11 @@ const Workspace = () => {
   useEffect(() => {
     const fetchTask = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/${id}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL || ''}/api/tasks/${id}`);
         setTask(data);
         setCode(starterByRole[data.role] || starterByRole.frontend_developer);
         if (data.status === 'Evaluated') {
-          const subRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/${id}/submissions`);
+          const subRes = await axios.get(`${import.meta.env.VITE_API_URL || ''}/api/tasks/${id}/submissions`);
           if (subRes.data.length > 0) {
             const lastSub = subRes.data[subRes.data.length - 1];
             setEvaluation(lastSub);
@@ -216,8 +216,8 @@ const Workspace = () => {
               <div className={styles.taskHeader}>
                 <h1>{task.title}</h1>
                 <span className={`${styles.difficulty} ${task.difficulty?.toLowerCase() === 'easy' ? styles.difficultyEasy :
-                    task.difficulty?.toLowerCase() === 'medium' ? styles.difficultyMedium :
-                      styles.difficultyHard
+                  task.difficulty?.toLowerCase() === 'medium' ? styles.difficultyMedium :
+                    styles.difficultyHard
                   }`}>{task.difficulty}</span>
               </div>
               <p className={styles.description}>{task.description}</p>
