@@ -7,7 +7,7 @@ node_modules/
 .env.local
 .env.*.local
 server/.env
-
+client/.env.local
 # Build outputs
 dist/
 dist-ssr/

@@ -94,11 +94,11 @@ const Workspace = () => {
   useEffect(() => {
     const fetchTask = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/tasks/${id}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/${id}`);
         setTask(data);
         setCode(starterByRole[data.role] || starterByRole.frontend_developer);
         if (data.status === 'Evaluated') {
-          const subRes = await axios.get(`http://localhost:5000/api/tasks/${id}/submissions`);
+          const subRes = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/${id}/submissions`);
           if (subRes.data.length > 0) {
             const lastSub = subRes.data[subRes.data.length - 1];
             setEvaluation(lastSub);
@@ -145,7 +145,7 @@ const Workspace = () => {
       updateSkills(data.newSkills);
       setTask((current) => ({ ...current, status: 'Evaluated', lastEvaluationScore: data.submission?.score }));
       refreshTasks(task?.role);
-      
+
       // Auto-switch to Evaluator Lens to view grade instantly!
       setActiveTab('evaluator');
     } catch (submitError) {
@@ -168,7 +168,7 @@ const Workspace = () => {
 
   return (
     <div className={`${styles.workspace} ${!sidebarOpen ? styles.workspaceCollapsed : ''}`}>
-      <div 
+      <div
         className={`${styles.leftPane} ${!sidebarOpen ? styles.leftPaneCollapsed : ''}`}
         style={{ width: sidebarOpen ? sidebarWidth : 0 }}
       >
@@ -176,9 +176,9 @@ const Workspace = () => {
           <button className={styles.backButton} onClick={() => navigate('/dashboard')} title="Back to Command Center">
             <FiArrowLeft />
           </button>
-          
+
           <div className={styles.paneDivider} />
-          
+
           <div className={styles.tabBar}>
             {tabs.map((tab) => (
               <button
@@ -193,8 +193,8 @@ const Workspace = () => {
             ))}
           </div>
 
-          <button 
-            className={styles.sidebarToggleButton} 
+          <button
+            className={styles.sidebarToggleButton}
             onClick={() => setSidebarOpen(false)}
             title="Collapse Sidebar"
           >
@@ -204,7 +204,7 @@ const Workspace = () => {
 
         <div className={styles.tabContent}>
           {activeTab === 'description' && (
-            <motion.div 
+            <motion.div
               className={styles.tabPane}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -215,11 +215,10 @@ const Workspace = () => {
               </div>
               <div className={styles.taskHeader}>
                 <h1>{task.title}</h1>
-                <span className={`${styles.difficulty} ${
-                  task.difficulty?.toLowerCase() === 'easy' ? styles.difficultyEasy :
-                  task.difficulty?.toLowerCase() === 'medium' ? styles.difficultyMedium :
-                  styles.difficultyHard
-                }`}>{task.difficulty}</span>
+                <span className={`${styles.difficulty} ${task.difficulty?.toLowerCase() === 'easy' ? styles.difficultyEasy :
+                    task.difficulty?.toLowerCase() === 'medium' ? styles.difficultyMedium :
+                      styles.difficultyHard
+                  }`}>{task.difficulty}</span>
               </div>
               <p className={styles.description}>{task.description}</p>
               {task.businessContext && (
@@ -272,7 +271,7 @@ const Workspace = () => {
           )}
 
           {activeTab === 'requirements' && (
-            <motion.div 
+            <motion.div
               className={styles.tabPane}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -301,7 +300,7 @@ const Workspace = () => {
           )}
 
           {activeTab === 'acceptance' && (
-            <motion.div 
+            <motion.div
               className={styles.tabPane}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -330,7 +329,7 @@ const Workspace = () => {
           )}
 
           {activeTab === 'evaluator' && (
-            <motion.div 
+            <motion.div
               className={styles.tabPane}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -384,10 +383,10 @@ const Workspace = () => {
                             </div>
                             <p>{rec.text}</p>
                             {rec.courseUrl && (
-                              <a 
-                                href={rec.courseUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
+                              <a
+                                href={rec.courseUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className={styles.learningLink}
                               >
                                 Explore Course: {rec.courseTitle || 'Learn More'}
@@ -410,7 +409,7 @@ const Workspace = () => {
           )}
 
           {activeTab === 'teammate' && (
-            <motion.div 
+            <motion.div
               className={styles.tabPane}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -425,8 +424,8 @@ const Workspace = () => {
       </div>
 
       {sidebarOpen && (
-        <div 
-          className={styles.resizerBar} 
+        <div
+          className={styles.resizerBar}
           onMouseDown={startResizing}
           title="Drag to resize instructions pane"
         />
@@ -436,7 +435,7 @@ const Workspace = () => {
         <div className={styles.editorHeader}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {!sidebarOpen && (
-              <button 
+              <button
                 className={styles.sidebarExpandButton}
                 onClick={() => setSidebarOpen(true)}
                 title="Show Instructions"
