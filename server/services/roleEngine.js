@@ -124,9 +124,17 @@ export const initializeRoleSkills = (existing = {}) => {
   const existingObject = existing instanceof Map ? Object.fromEntries(existing) : existing;
   const roleSkills = { ...existingObject };
   Object.values(WORKPLACE_ROLES).forEach((role) => {
+    // Start every skill key at 0 for new users; preserve any previously earned values.
+    const zeroBase = Object.fromEntries(Object.keys(role.skills).map((k) => [k, 0]));
+    let currentSkills = roleSkills[role.id] || {};
+    const isLegacy = Object.keys(currentSkills).length > 0 && Object.keys(role.skills).every(k => currentSkills[k] === role.skills[k]);
+    if (isLegacy) {
+      currentSkills = {};
+    }
+
     roleSkills[role.id] = {
-      ...role.skills,
-      ...(roleSkills[role.id] || {})
+      ...zeroBase,
+      ...currentSkills
     };
   });
   return roleSkills;
@@ -134,12 +142,21 @@ export const initializeRoleSkills = (existing = {}) => {
 
 export const getRoleSkillGraph = (user, roleId) => {
   const role = resolveRole(roleId);
-  const rawSkills = user?.roleSkills instanceof Map
+  let rawSkills = user?.roleSkills instanceof Map
     ? user.roleSkills.get(role.id)
     : user?.roleSkills?.[role.id];
 
+  // Fix legacy hardcoded data bug: If rawSkills matches the hardcoded defaults, ignore it
+  const isLegacy = rawSkills && Object.keys(role.skills).every(k => rawSkills[k] === role.skills[k]);
+  if (isLegacy) {
+    rawSkills = null;
+  }
+
+  // Build a zero-baseline from the role's skill keys so new users always
+  // start at 0 instead of inheriting the hardcoded fallback numbers.
+  const zeroBase = Object.fromEntries(Object.keys(role.skills).map((k) => [k, 0]));
   return {
-    ...role.skills,
+    ...zeroBase,
     ...(rawSkills || {})
   };
 };
@@ -147,10 +164,8 @@ export const getRoleSkillGraph = (user, roleId) => {
 export const applySkillUpdates = (user, roleId, skillUpdates = {}) => {
   const role = resolveRole(roleId);
   const roleSkills = initializeRoleSkills(user.roleSkills || {});
-  const current = {
-    ...role.skills,
-    ...(roleSkills[role.id] || {})
-  };
+  // Use the initialized (zero-based) skills as the starting point, not the hardcoded defaults.
+  const current = { ...(roleSkills[role.id] || {}) };
 
   Object.entries(skillUpdates).forEach(([skill, delta]) => {
     const currentValue = Number(current[skill] || 0);

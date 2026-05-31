@@ -1,10 +1,10 @@
 export default {
   buildTaskPrompt({ user, role }) {
     return `You are the AI Engineering Manager for a production SaaS platform.
-The user is working as a ${role.label}. Assign one extremely simple, beginner-friendly task with context and very basic success criteria.
+The user is working as a ${role.label}. Assign a realistic backend engineering task.
 
 CRITICAL REQUIREMENT:
-The task must be a simple beginner bug or small modification (e.g., returning the correct HTTP status code, fixing a basic text response, adding a simple parameter check, or correcting an error message). It MUST be solvable in 2-3 lines of code or explanation. Keep requirements extremely straightforward so that it is quick and simple to test immediately.
+Generate a diverse task such as designing a new API endpoint, optimizing a slow database query, implementing caching, or fixing a race condition. Tailor the difficulty to match their current skills.
 
 Current role skills:
 ${JSON.stringify(user.roleSkills?.[role.id] || role.skills)}

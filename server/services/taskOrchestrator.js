@@ -10,11 +10,6 @@ import {
   initializeRoleSkills,
   resolveRole
 } from './roleEngine.js';
-import { buildWorkplaceActivityEvent, calculatePerformanceSnapshot } from './performanceEngine.js';
-import SkillProgress from '../models/SkillProgress.js';
-import Evaluation from '../models/Evaluation.js';
-import { createActivity, getDashboardSnapshot } from './dashboardEngine.js';
-import { evolveSkills } from './skillEngine.js';
 
 export const switchUserRole = async ({ user, roleId }) => {
   const role = resolveRole(roleId);
@@ -42,35 +37,43 @@ export const assignRoleTask = async ({ user, requestedRoleId }) => {
     deadline: generatedTask.deadline || 'Before EOD',
     businessContext: generatedTask.businessContext,
     skillTargets: generatedTask.skillTargets || [],
+    datasetName: generatedTask.datasetName,
+    datasetSchema: generatedTask.datasetSchema,
+    chartData: generatedTask.chartData,
     evaluationCriteria: role.evaluationCriteria,
     role: role.id,
     assignedTo: user._id,
     manager: {
-      name: role.teammateName,
+      name: `${role.label} Manager`,
       title: 'AI Engineering Manager',
       behavior: role.headline
     }
   });
 
-  const performance = await calculatePerformanceSnapshot({ user, roleId: role.id });
-  await createActivity({
-    userId: user._id,
-    role: role.id,
-    type: 'task',
-    title: `AI Manager assigned ${task.category}`,
-    detail: task.title,
-    metadata: { taskId: task._id, difficulty: task.difficulty }
-  });
-  const dashboardSnapshot = await getDashboardSnapshot({ user, roleId: role.id });
-
-  return {
-    task,
-    roleContext,
-    performance,
-    activityEvent: buildWorkplaceActivityEvent({ type: 'task', role, task, performance }),
-    dashboardSnapshot
-  };
+  return { task, roleContext };
 };
+
+// Force all recommendation URLs to be LinkedIn Learning keyword-search URLs.
+// The AI model ignores prompt instructions and generates direct course links,
+// so we sanitize server-side to guarantee working search URLs every time.
+const sanitizeRecommendations = (recommendations = []) =>
+  recommendations.map(rec => {
+    const url = rec.courseUrl || '';
+    const isDirectLink =
+      url.includes('linkedin.com/learning/') &&
+      !url.includes('/search?');
+    if (isDirectLink) {
+      const keywords = encodeURIComponent(
+        (rec.courseTitle || rec.text || 'professional development')
+          .replace(/[^a-zA-Z0-9 ]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 80)
+      );
+      return { ...rec, courseUrl: `https://www.linkedin.com/learning/search?keywords=${keywords}` };
+    }
+    return rec;
+  });
 
 export const evaluateRoleSubmission = async ({ user, taskId, content }) => {
   const task = await Task.findOne({ _id: taskId, assignedTo: user._id });
@@ -89,6 +92,18 @@ export const evaluateRoleSubmission = async ({ user, taskId, content }) => {
     evaluator
   });
 
+  // Sanitize recommendation URLs regardless of what the AI returned
+  const safeRecommendations = sanitizeRecommendations(evaluation.recommendations);
+
+  // Mongoose Maps do not support keys with dots. Sanitize skill keys.
+  const safeSkillUpdates = {};
+  if (evaluation.skillUpdates) {
+    for (const [key, value] of Object.entries(evaluation.skillUpdates)) {
+      const safeKey = key.replace(/\./g, '_');
+      safeSkillUpdates[safeKey] = value;
+    }
+  }
+
   const submission = await Submission.create({
     task: task._id,
     user: user._id,
@@ -99,63 +114,22 @@ export const evaluateRoleSubmission = async ({ user, taskId, content }) => {
     strengths: evaluation.strengths || [],
     weaknesses: evaluation.weaknesses || [],
     suggestions: evaluation.suggestions || [],
-    recommendations: evaluation.recommendations || [],
-    skillUpdates: evaluation.skillUpdates || {}
+    recommendations: safeRecommendations,
+    skillUpdates: safeSkillUpdates
   });
 
   task.status = 'Evaluated';
   task.lastEvaluationScore = evaluation.score;
   await task.save();
 
-  const updatedSkillGraph = applySkillUpdates(user, role.id, evaluation.skillUpdates);
-  const evolvedSkills = evolveSkills({
-    role: role.id,
-    currentSkills: updatedSkillGraph,
-    task,
-    evaluation
-  });
-  user.roleSkills = {
-    ...(user.roleSkills || {}),
-    [role.id]: evolvedSkills
-  };
-  user.markModified?.('roleSkills');
+  const updatedSkillGraph = applySkillUpdates(user, role.id, safeSkillUpdates);
   await user.save();
-  const skillProgress = await SkillProgress.findOneAndUpdate(
-    { userId: user._id, role: role.id },
-    { skills: evolvedSkills },
-    { upsert: true, new: true }
-  );
-  await Evaluation.create({
-    userId: user._id,
-    taskId: task._id,
-    submissionId: submission._id,
-    role: role.id,
-    score: evaluation.score,
-    skills: evaluation.skills || evolvedSkills,
-    strengths: evaluation.strengths || [],
-    weaknesses: evaluation.weaknesses || [],
-    recommendations: evaluation.recommendations || [],
-    confidence: evaluation.confidence || submission.score || 0
-  });
-  const performance = await calculatePerformanceSnapshot({ user, roleId: role.id, evaluation });
-  await createActivity({
-    userId: user._id,
-    role: role.id,
-    type: 'evaluation',
-    title: `${role.label} evaluation completed`,
-    detail: `Score ${submission.score}. Skills updated from ${task.title}.`,
-    metadata: { taskId: task._id, submissionId: submission._id, skillProgress: skillProgress.skills }
-  });
-  const dashboardSnapshot = await getDashboardSnapshot({ user, roleId: role.id });
 
   return {
     submission,
-    evaluation,
+    evaluation: { ...evaluation, recommendations: safeRecommendations },
     newSkills: user.skills,
-    skillGraph: evolvedSkills,
-    roleContext: await buildRoleContext(user, role.id),
-    performance,
-    activityEvent: buildWorkplaceActivityEvent({ type: 'evaluation', role, task, evaluation, performance }),
-    dashboardSnapshot
+    skillGraph: updatedSkillGraph,
+    roleContext: await buildRoleContext(user, role.id)
   };
 };

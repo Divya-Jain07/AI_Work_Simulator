@@ -16,6 +16,9 @@ const taskSchema = new mongoose.Schema({
   acceptanceCriteria: [{ type: String }],
   evaluationCriteria: [{ type: String }],
   skillTargets: [{ type: String }],
+  datasetName: { type: String },
+  datasetSchema: { type: mongoose.Schema.Types.Mixed },
+  chartData: { type: mongoose.Schema.Types.Mixed },
   manager: {
     name: { type: String },
     title: { type: String },

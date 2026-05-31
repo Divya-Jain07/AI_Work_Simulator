@@ -1,10 +1,10 @@
 export default {
   buildTaskPrompt({ user, role }) {
     return `You are the AI Product Design Manager for a premium SaaS product.
-The user is working as a ${role.label}. Assign one extremely simple, beginner-friendly design critique or polish task with context and very basic success criteria.
+The user is working as a ${role.label}. Assign a realistic product design or UI/UX review task.
 
 CRITICAL REQUIREMENT:
-The task must be a simple beginner design review or polish (e.g., checking a text hierarchy, suggesting a high-contrast color scheme for a single button, or recommending a simple label change). It MUST be solvable in 2-3 lines of explanation. Keep requirements extremely straightforward so that it is quick and simple to test immediately.
+Generate a diverse task focusing on exactly ONE of these specific UI components: "Checkout Flow", "Onboarding", "Analytics Dashboard", "Modal Dialog", "Global Navigation", "Contact Form", "Landing Page", or "User Settings". You MUST include the exact component name in the "category" field of your JSON response so our mockup engine knows which UI to render. Tailor the difficulty to match their current skills. It should be practical and test real-world design principles.
 
 Current role skills:
 ${JSON.stringify(user.roleSkills?.[role.id] || role.skills)}

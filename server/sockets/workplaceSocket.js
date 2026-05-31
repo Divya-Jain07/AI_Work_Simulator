@@ -53,9 +53,6 @@ export const registerWorkplaceSocket = (io) => {
         const user = await User.findById(socket.user._id).select('-password');
         const result = await assignRoleTask({ user, requestedRoleId: roleId });
         io.to(`user:${user._id}`).emit('task:assigned', result);
-        if (result.dashboardSnapshot) {
-          io.to(`user:${user._id}`).emit('dashboard:updated', result.dashboardSnapshot);
-        }
         callback?.({ ok: true, ...result });
       } catch (error) {
         callback?.({ ok: false, message: error.message });
@@ -67,9 +64,6 @@ export const registerWorkplaceSocket = (io) => {
         const user = await User.findById(socket.user._id).select('-password');
         const result = await evaluateRoleSubmission({ user, taskId, content });
         io.to(`user:${user._id}`).emit('submission:evaluated', result);
-        if (result.dashboardSnapshot) {
-          io.to(`user:${user._id}`).emit('dashboard:updated', result.dashboardSnapshot);
-        }
         callback?.({ ok: true, ...result });
       } catch (error) {
         callback?.({ ok: false, message: error.message });

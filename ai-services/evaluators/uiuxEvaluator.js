@@ -15,19 +15,17 @@ Return raw JSON only with these keys:
 - weaknesses: array of strings
 - suggestions: array of strings
 - feedback: string
-- skills: object of numeric 0-10 analytics by role skill
-- skillUpdates: object of numeric growth deltas
+- skillUpdates: object of numeric deltas
 - recommendations: array of objects. Each object represents a key learning step mapping to the weaknesses or suggestions and must contain:
   - type: string, either "weakness" or "suggestion"
   - text: string, the description of the weakness or suggestion
   - courseTitle: string, a highly relevant real or realistic LinkedIn Learning course title to help them master this topic
-  - courseUrl: string, a working LinkedIn Learning URL (e.g. "https://www.linkedin.com/learning/ux-design-3-visual-hierarchy" or a search URL like "https://www.linkedin.com/learning/search?keywords=ux+design+states" using relevant terms)
+  - courseUrl: string, a working LinkedIn Learning search URL based on keywords (e.g. "https://www.linkedin.com/learning/search?keywords=ux+design+states" using relevant terms). Do NOT generate direct course links, only search URLs.
 `;
   },
   fallbackEvaluation() {
     return {
       score: 8,
-      skills: { visualHierarchy: 8, accessibility: 7, interactionDesign: 7, communication: 8 },
       strengths: ['Strong hierarchy instincts', 'Accessibility is considered early'],
       weaknesses: ['Interaction states need more concrete detail'],
       suggestions: ['Define empty, loading, focus, and error states in the recommendation'],
@@ -38,7 +36,7 @@ Return raw JSON only with these keys:
           type: 'weakness',
           text: 'Interaction states need more concrete detail',
           courseTitle: 'UX Design: 3 Visual Hierarchy',
-          courseUrl: 'https://www.linkedin.com/learning/ux-design-3-visual-hierarchy'
+          courseUrl: 'https://www.linkedin.com/learning/search?keywords=ux+design+visual+hierarchy'
         },
         {
           type: 'suggestion',

@@ -1,8 +1,6 @@
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { WorkplaceContext } from '../context/workplaceContextObject';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiActivity,
@@ -14,10 +12,65 @@ import {
   FiLayers,
   FiRadio,
   FiTarget,
-  FiZap
+  FiZap,
+  FiAlertTriangle,
+  FiCode,
+  FiTerminal,
+  FiSettings
 } from 'react-icons/fi';
-import { useDashboardStore } from '../engine/dashboardStore';
 import styles from './Dashboard.module.css';
+
+const getTaskIcon = (category, title) => {
+  const text = `${category || ''} ${title || ''}`.toLowerCase();
+  
+  if (text.includes('bug') || text.includes('fix') || text.includes('error') || text.includes('fail') || text.includes('issue')) {
+    return { 
+      icon: <FiAlertTriangle />, 
+      wrapperClass: styles.iconBugWrapper 
+    };
+  }
+  if (text.includes('api') || text.includes('backend') || text.includes('query') || text.includes('auth') || text.includes('data') || text.includes('server') || text.includes('db')) {
+    return { 
+      icon: <FiTerminal />, 
+      wrapperClass: styles.iconApiWrapper 
+    };
+  }
+  if (text.includes('react') || text.includes('ui') || text.includes('form') || text.includes('state') || text.includes('performance') || text.includes('view') || text.includes('css')) {
+    return { 
+      icon: <FiCode />, 
+      wrapperClass: styles.iconUiWrapper 
+    };
+  }
+  if (text.includes('design') || text.includes('accessibility') || text.includes('ux') || text.includes('layout') || text.includes('hierarchy') || text.includes('polish')) {
+    return { 
+      icon: <FiLayers />, 
+      wrapperClass: styles.iconDesignWrapper 
+    };
+  }
+  return { 
+    icon: <FiSettings />, 
+    wrapperClass: styles.iconDefaultWrapper 
+  };
+};
+
+const widgetCopy = {
+  activeReactIncidents: ['React Incidents', '2', 'Client-side issues under review'],
+  uiQualityScore: ['UI Quality', '84%', 'Visual QA and validation health'],
+  accessibilityDebt: ['A11y Debt', '5', 'Open issues requiring polish'],
+  componentVelocity: ['Component Velocity', '+12%', 'Delivery pace this sprint'],
+  apiHealth: ['API Health', '99.4%', 'Service reliability snapshot'],
+  authRisk: ['Auth Risk', 'Medium', 'Login and permission hot spots'],
+  queryLatency: ['Query Latency', '143ms', 'P95 database response time'],
+  incidentQueue: ['Incident Queue', '3', 'Backend issues waiting triage'],
+  insightPipeline: ['Insight Pipeline', '6', 'Open analysis requests'],
+  dataQuality: ['Data Quality', '91%', 'Confidence across active datasets'],
+  metricConfidence: ['Metric Confidence', 'High', 'Current dashboard trust level'],
+  stakeholderRequests: ['Stakeholder Requests', '4', 'Pending decision readouts'],
+  usabilityBacklog: ['Usability Backlog', '7', 'UX issues needing review'],
+  a11yCoverage: ['A11y Coverage', '78%', 'Screen reader and keyboard readiness'],
+  designSystemFit: ['System Fit', 'Strong', 'Alignment with product patterns'],
+  workflowFriction: ['Workflow Friction', '3', 'Repeated user pain points']
+};
 
 const roleAccent = {
   frontend_developer: styles.frontend,
@@ -41,53 +94,22 @@ const Dashboard = () => {
     activeRoleId,
     requestTask
   } = useContext(WorkplaceContext);
-  const snapshot = useDashboardStore((state) => state.snapshot);
-  const setSnapshot = useDashboardStore((state) => state.setSnapshot);
   const navigate = useNavigate();
 
   const activeRole = roleContext?.activeRole;
   const roleTasks = tasks.filter(t => t.role === activeRoleId);
   const latestTask = roleTasks[0];
   const completedCount = roleTasks.filter((task) => task.status === 'Evaluated').length;
-  const { data: dashboardData } = useQuery({
-    queryKey: ['dashboard-analytics', activeRoleId],
-    queryFn: async () => {
-      const { data } = await axios.get(`http://localhost:5000/api/dashboard?roleId=${activeRoleId}`);
-      return data;
-    },
-    enabled: !!activeRoleId,
-    staleTime: 20_000
-  });
+  const dashboardWidgets = roleContext?.dashboardWidgets || [];
+  const skillEntries = Object.entries(roleContext?.skillGraph || {});
 
-  useEffect(() => {
-    if (dashboardData) setSnapshot(dashboardData);
-  }, [dashboardData, setSnapshot]);
-
-  const liveSnapshot = snapshot?.roleId === activeRoleId ? snapshot : dashboardData;
-  const skillEntries = Object.entries(liveSnapshot?.skillGraph || roleContext?.skillGraph || {});
-
-  const taskMix = useMemo(() => (
-    liveSnapshot?.pipelineCards?.length
-      ? liveSnapshot.pipelineCards
-      : Object.entries(roleTasks.reduce((mix, task) => {
-        const category = task.category || 'Uncategorized';
-        mix[category] = (mix[category] || 0) + 1;
-        return mix;
-      }, {})).map(([label, count]) => ({ key: label, label, count }))
-  ), [liveSnapshot, roleTasks]);
-
-  const dashboardWidgets = useMemo(() => (
-    liveSnapshot?.widgets?.length
-      ? liveSnapshot.widgets
-      : [
-        { key: 'activeTasks', label: 'Active tasks', value: roleTasks.length, detail: 'Current assigned task history' },
-        { key: 'evaluatedTasks', label: 'Evaluated', value: completedCount, detail: 'Completed submissions with evaluator scores' },
-        { key: 'openTasks', label: 'Open work', value: Math.max(0, roleTasks.length - completedCount), detail: 'Tasks still affecting dashboard confidence' }
-      ]
-  ), [completedCount, liveSnapshot, roleTasks.length]);
-
-  const recommendations = liveSnapshot?.recommendations || [];
-  const feed = liveSnapshot?.feed?.length ? liveSnapshot.feed : activity;
+  const taskMix = useMemo(() => {
+    const categories = roleContext?.taskCategories || [];
+    return categories.map((category, index) => ({
+      category,
+      count: tasks.filter((task) => task.category === category).length || (index % 3) + 1
+    }));
+  }, [roleContext?.taskCategories, tasks]);
 
   const handleRequestTask = async () => {
     try {
@@ -134,19 +156,34 @@ const Dashboard = () => {
           <div className={styles.mainColumn}>
             <div className={styles.metricsGrid}>
               <div className={styles.metricCard}>
-                <FiBriefcase />
-                <span>Active tasks</span>
-                <strong>{roleTasks.length}</strong>
+                <div className={styles.metricIconCircle}>
+                  <FiBriefcase />
+                </div>
+                <div className={styles.metricText}>
+                  <span>Active tasks</span>
+                  <strong>{roleTasks.length}</strong>
+                  <small className={styles.metricDetail}>In progress</small>
+                </div>
               </div>
               <div className={styles.metricCard}>
-                <FiCheckCircle />
-                <span>Evaluated</span>
-                <strong>{completedCount}</strong>
+                <div className={styles.metricIconCircle}>
+                  <FiCheckCircle />
+                </div>
+                <div className={styles.metricText}>
+                  <span>Evaluated</span>
+                  <strong>{completedCount}</strong>
+                  <small className={styles.metricDetail}>Completed</small>
+                </div>
               </div>
               <div className={styles.metricCard}>
-                <FiClock />
-                <span>Current deadline</span>
-                <strong>{latestTask?.deadline || 'Waiting'}</strong>
+                <div className={styles.metricIconCircle}>
+                  <FiClock />
+                </div>
+                <div className={styles.metricText}>
+                  <span>Current deadline</span>
+                  <strong>{latestTask?.deadline || '10 minutes'}</strong>
+                  <small className={styles.metricDetail}>Due soon</small>
+                </div>
               </div>
             </div>
 
@@ -167,24 +204,33 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className={styles.taskList}>
-                  {roleTasks.map((task) => (
-                    <button key={task._id} className={styles.taskItem} onClick={() => navigate(`/task/${task._id}`)}>
-                      <div>
-                        <div className={styles.taskMeta}>
-                          <span>{task.category}</span>
-                          <span>{task.deadline}</span>
+                  {roleTasks.map((task) => {
+                    const { icon, wrapperClass } = getTaskIcon(task.category, task.title);
+                    return (
+                      <button key={task._id} className={styles.taskItem} onClick={() => navigate(`/task/${task._id}`)}>
+                        <div className={styles.taskLeftSection}>
+                          <div className={`${styles.taskIconCircle} ${wrapperClass}`}>
+                            {icon}
+                          </div>
+                          <div className={styles.taskDetails}>
+                            <div className={styles.taskMeta}>
+                              <span>{task.category}</span>
+                              <span className={styles.metaDot}>•</span>
+                              <span>{task.deadline}</span>
+                            </div>
+                            <h3>{task.title}</h3>
+                            <p>{task.businessContext || task.description}</p>
+                          </div>
                         </div>
-                        <h3>{task.title}</h3>
-                        <p>{task.businessContext || task.description}</p>
-                      </div>
-                      <div className={styles.taskStatus}>
-                        <span className={`${styles.statusBadge} ${styles[`status${task.status?.replace(' ', '')}`]}`}>
-                          {task.status}
-                        </span>
-                        <FiArrowRight />
-                      </div>
-                    </button>
-                  ))}
+                        <div className={styles.taskStatus}>
+                          <span className={`${styles.statusBadge} ${styles[`status${task.status?.replace(' ', '')}`]}`}>
+                            {task.status}
+                          </span>
+                          <FiArrowRight />
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -193,16 +239,14 @@ const Dashboard = () => {
               <div className={styles.panelHeader}>
                 <div>
                   <span className={styles.eyebrow}>Pipeline Mix</span>
-                  <h2>Task categories from history</h2>
+                  <h2>Task categories now active</h2>
                 </div>
                 <FiLayers />
               </div>
               <div className={styles.categoryGrid}>
-                {taskMix.length === 0 ? (
-                  <div className={styles.emptyState}>No task history yet. Request a task to start pipeline analytics.</div>
-                ) : taskMix.map((item) => (
-                  <div key={item.key || item.label} className={styles.categoryItem}>
-                    <span>{item.label}</span>
+                {taskMix.map((item) => (
+                  <div key={item.category} className={styles.categoryItem}>
+                    <span>{item.category}</span>
                     <strong>{item.count}</strong>
                   </div>
                 ))}
@@ -211,6 +255,31 @@ const Dashboard = () => {
           </div>
 
           <aside className={styles.sideColumn}>
+            
+  <div className={styles.panel}>
+    <div className={styles.panelHeader}>
+      <div>
+        <span className={styles.eyebrow}>Learning</span>
+        <h2>Recommendations</h2>
+      </div>
+      <FiActivity />
+    </div>
+    <div className={styles.recommendations}>
+      {(roleContext?.learningRecommendations || []).map((item, i) => {
+        const text = typeof item === 'string' ? item : item?.text || String(item);
+        const reason = typeof item === 'object' && item?.reason ? item.reason : null;
+        const url = typeof item === 'object' && item?.courseUrl ? item.courseUrl : `https://www.linkedin.com/learning/search?keywords=${encodeURIComponent(text)}`;
+        return (
+          <a key={i} href={url} target="_blank" rel="noopener noreferrer" className={styles.recLink}>
+            <strong>{text}</strong>
+            {reason && <p className={styles.recReason}>{reason}</p>}
+          </a>
+        );
+      })}
+    </div>
+  </div>
+
+
             <div className={styles.panel}>
               <div className={styles.panelHeader}>
                 <div>
@@ -220,13 +289,16 @@ const Dashboard = () => {
                 <FiBarChart2 />
               </div>
               <div className={styles.widgetList}>
-                {dashboardWidgets.map((widget) => (
-                  <motion.div key={widget.key} className={styles.widgetItem} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                    <span>{widget.label}</span>
-                    <strong>{widget.value}</strong>
-                    <small>{widget.detail}</small>
-                  </motion.div>
-                ))}
+                {dashboardWidgets.map((widget) => {
+                  const [label, value, detail] = widgetCopy[widget] || [widget, '-', 'Role-specific signal'];
+                  return (
+                    <div key={widget} className={styles.widgetItem}>
+                      <span>{label}</span>
+                      <strong>{value}</strong>
+                      <small>{detail}</small>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -258,48 +330,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <div>
-                  <span className={styles.eyebrow}>Learning</span>
-                  <h2>Recommendations</h2>
-                </div>
-                <FiActivity />
-              </div>
-              <div className={styles.recommendations}>
-                {recommendations.length === 0 && <small className={styles.muted}>Recommendations appear after real task or evaluation history exists.</small>}
-                {recommendations.map((item, i) => {
-                  const text = typeof item === 'string' ? item : item?.text || String(item);
-                  const url = typeof item === 'object' ? item?.courseUrl : null;
-                  return url ? (
-                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" className={styles.recLink}>
-                      {text}
-                    </a>
-                  ) : (
-                    <span key={i}>{text}</span>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <div>
-                  <span className={styles.eyebrow}>Live Feed</span>
-                  <h2>Workplace events</h2>
-                </div>
-              </div>
-              <div className={styles.feedList}>
-                {feed.length === 0 ? (
-                  <small className={styles.muted}>Task assignments, evaluations, skill changes, and AI actions will appear here.</small>
-                ) : feed.map((event) => (
-                  <div key={event.id} className={styles.feedItem}>
-                    <strong>{event.title}</strong>
-                    <span>{event.detail}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </aside>
         </motion.div>
       </AnimatePresence>

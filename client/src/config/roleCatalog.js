@@ -14,9 +14,9 @@ export const ROLE_CATALOG = {
       'Clear implementation notes'
     ],
     learningRecommendations: [
-      'React rendering patterns and state colocation',
-      'Form validation edge cases',
-      'Component testing with user-focused assertions'
+      { text: 'React rendering & state colocation', reason: 'Based on frequent state management bugs' },
+      { text: 'Form validation edge cases', reason: 'Recommended to improve client-side reliability' },
+      { text: 'User-focused component testing', reason: 'Based on recent UI testing gaps' }
     ],
     defaultSkillGraph: {
       react: 58,
@@ -41,9 +41,9 @@ export const ROLE_CATALOG = {
       'Operationally useful error handling'
     ],
     learningRecommendations: [
-      'JWT authorization failure modes',
-      'MongoDB query and index design',
-      'Express service boundary patterns'
+      { text: 'JWT auth failure modes', reason: 'Based on your recent authentication tasks' },
+      { text: 'MongoDB query optimization', reason: 'Recommended to lower query latency' },
+      { text: 'Express service boundaries', reason: 'Based on API architecture feedback' }
     ],
     defaultSkillGraph: {
       apiDesign: 56,
@@ -68,9 +68,9 @@ export const ROLE_CATALOG = {
       'Concise stakeholder communication'
     ],
     learningRecommendations: [
-      'Exploratory analysis checklists',
-      'Metric definition and anomaly review',
-      'Narrative charting for business decisions'
+      { text: 'Exploratory analysis checklists', reason: 'Based on gaps in recent metric QA' },
+      { text: 'Metric anomaly review', reason: 'Recommended to improve insight generation' },
+      { text: 'Narrative charting for business', reason: 'Based on stakeholder communication feedback' }
     ],
     defaultSkillGraph: {
       dataCleaning: 55,
@@ -95,9 +95,9 @@ export const ROLE_CATALOG = {
       'Specific, actionable design recommendations'
     ],
     learningRecommendations: [
-      'Accessibility-first design review',
-      'Information hierarchy in SaaS dashboards',
-      'Writing concise product critique'
+      { text: 'Accessibility-first design', reason: 'Based on recent a11y coverage audits' },
+      { text: 'SaaS dashboard hierarchy', reason: 'Recommended to reduce workflow friction' },
+      { text: 'Concise product critique', reason: 'Based on your design QA reviews' }
     ],
     defaultSkillGraph: {
       visualHierarchy: 57,

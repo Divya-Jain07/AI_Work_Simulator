@@ -15,19 +15,17 @@ Return raw JSON only with these keys:
 - weaknesses: array of strings
 - suggestions: array of strings
 - feedback: string
-- skills: object of numeric 0-10 analytics by role skill
-- skillUpdates: object of numeric growth deltas
+- skillUpdates: object of numeric deltas
 - recommendations: array of objects. Each object represents a key learning step mapping to the weaknesses or suggestions and must contain:
   - type: string, either "weakness" or "suggestion"
   - text: string, the description of the weakness or suggestion
   - courseTitle: string, a highly relevant real or realistic LinkedIn Learning course title to help them master this topic
-  - courseUrl: string, a working LinkedIn Learning URL (e.g. "https://www.linkedin.com/learning/designing-restful-apis" or a search URL like "https://www.linkedin.com/learning/search?keywords=backend+api+design" using relevant terms)
+  - courseUrl: string, a working LinkedIn Learning search URL based on keywords (e.g. "https://www.linkedin.com/learning/search?keywords=backend+api+design" using relevant terms). Do NOT generate direct course links, only search URLs.
 `;
   },
   fallbackEvaluation() {
     return {
       score: 8,
-      skills: { apiDesign: 8, authentication: 7, reliability: 7, communication: 7 },
       strengths: ['Good API contract awareness', 'Security implications are addressed'],
       weaknesses: ['Database and logging impact could be clearer'],
       suggestions: ['Add explicit authorization checks and document expected failure responses'],
@@ -44,7 +42,7 @@ Return raw JSON only with these keys:
           type: 'suggestion',
           text: 'Add explicit authorization checks and document expected failure responses',
           courseTitle: 'Web Security: OAuth and OpenID Connect',
-          courseUrl: 'https://www.linkedin.com/learning/web-security-oauth-and-openid-connect'
+          courseUrl: 'https://www.linkedin.com/learning/search?keywords=web+security+oauth'
         }
       ]
     };

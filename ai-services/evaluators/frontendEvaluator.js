@@ -15,8 +15,7 @@ Return raw JSON only with these keys:
 - weaknesses: array of strings
 - suggestions: array of strings
 - feedback: string
-- skills: object of numeric 0-10 analytics by role skill
-- skillUpdates: object of numeric growth deltas
+- skillUpdates: object of numeric deltas
 - recommendations: array of objects. Each object represents a key learning step mapping to the weaknesses or suggestions and must contain:
   - type: string, either "weakness" or "suggestion"
   - text: string, the description of the weakness or suggestion
@@ -27,7 +26,6 @@ Return raw JSON only with these keys:
   fallbackEvaluation() {
     return {
       score: 8,
-      skills: { react: 8, accessibility: 6, testing: 7, communication: 7 },
       strengths: ['Clear component-level reasoning', 'Good attention to validation behavior'],
       weaknesses: ['Could describe edge case coverage more explicitly'],
       suggestions: ['Add null checks for API responses and include one regression test'],
@@ -38,7 +36,7 @@ Return raw JSON only with these keys:
           type: 'weakness',
           text: 'Could describe edge case coverage more explicitly',
           courseTitle: 'React: Testing and Debugging',
-          courseUrl: 'https://www.linkedin.com/learning/react-testing-and-debugging'
+          courseUrl: 'https://www.linkedin.com/learning/search?keywords=react+testing+debugging'
         },
         {
           type: 'suggestion',

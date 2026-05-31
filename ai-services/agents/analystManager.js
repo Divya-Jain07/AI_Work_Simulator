@@ -1,16 +1,16 @@
 export default {
   buildTaskPrompt({ user, role }) {
     return `You are the AI Analytics Manager for a product organization.
-The user is working as a ${role.label}. Assign one extremely simple, beginner-friendly task with context and very basic success criteria.
+The user is working as a ${role.label}. Assign a realistic data analytics or reporting task.
 
 CRITICAL REQUIREMENT:
-The task must be a simple beginner analytics calculation or metric reading (e.g., stating which user segment has the highest conversion, calculating basic math percentages from 2 numbers, or identifying a metric change). It MUST be solvable in 2-3 lines of explanation or math. Keep requirements extremely straightforward so that it is quick and simple to test immediately.
+Generate a diverse task such as cohort analysis, revenue modeling, churn prediction, A/B test analysis, or funnel drop-off investigation. Tailor the difficulty to match their current skills. It should require meaningful SQL querying, data interpretation, or business insight generation.
 
 Current role skills:
 ${JSON.stringify(user.roleSkills?.[role.id] || role.skills)}
 
 Return raw JSON only with:
-title, description, category, requirements(array), difficulty(Easy|Medium|Hard), deadline, businessContext, acceptanceCriteria(array), skillTargets(array).`;
+title, description, category, requirements(array), difficulty(Easy|Medium|Hard), deadline, businessContext, acceptanceCriteria(array), skillTargets(array), datasetName(string), datasetSchema(array of objects with name, type, nullable, unique, example, desc), chartData(object mapping chart keys to {label: string, data: array of {x: string, y: number}}).`;
   },
   fallbackTask(role) {
     return {
@@ -23,6 +23,21 @@ title, description, category, requirements(array), difficulty(Easy|Medium|Hard),
       businessContext: 'Marketing wants to focus their campaign on the best segment today.',
       acceptanceCriteria: ['Highest segment identified is Segment B', 'Concise performance summary included'],
       skillTargets: ['businessInsight', 'communication'],
+      datasetName: 'marketing_segments.csv',
+      datasetSchema: [
+        { name: 'segment_name', type: 'VARCHAR', nullable: false, unique: true, example: 'Segment A', desc: 'Name of the marketing segment' },
+        { name: 'conversion_rate', type: 'DECIMAL', nullable: false, unique: false, example: '4.00', desc: 'Conversion rate percentage' }
+      ],
+      chartData: {
+        conversions_by_segment: {
+          label: 'Conversion Rate by Segment (%)',
+          data: [
+            { x: 'Segment A', y: 4.0 },
+            { x: 'Segment B', y: 8.0 },
+            { x: 'Segment C', y: 3.0 }
+          ]
+        }
+      },
       role: role.id
     };
   },

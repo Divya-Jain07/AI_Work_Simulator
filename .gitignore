@@ -35,3 +35,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Large assets (ignore for repo)
+*.pptx
+*.pdf

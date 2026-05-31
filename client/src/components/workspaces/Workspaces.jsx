@@ -1,33 +1,26 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { ThemeContext } from '../../context/ThemeContext';
 import Editor from '@monaco-editor/react';
-import { Background, Handle, MarkerType, Position, ReactFlow } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { motion } from 'framer-motion';
-import { FiActivity, FiAlertTriangle, FiBarChart2, FiCpu, FiDatabase, FiGitPullRequest, FiRefreshCw, FiTrendingDown, FiTrendingUp, FiZap } from 'react-icons/fi';
-import { WorkplaceContext } from '../../context/workplaceContextObject';
 import styles from './Workspaces.module.css';
+import { DesignWorkspace } from './DesignWorkspace';
 
 export const CodeWorkspace = ({ value, onChange, language = "javascript" }) => {
+  const { theme } = useContext(ThemeContext);
   return (
     <div className={styles.workspaceContainer}>
       <Editor
         height="100%"
         defaultLanguage={language}
-        theme="vs-dark"
+        theme={theme === 'dark' ? "vs-dark" : "light"}
         value={value}
         onChange={(val) => onChange(val || '')}
         options={{
           minimap: { enabled: false },
-          fontSize: 18,
-          lineHeight: 30,
+          fontSize: 14,
+          lineHeight: 22,
           wordWrap: 'on',
-          padding: { top: 28 },
-          scrollBeyondLastLine: false,
-          lineNumbersMinChars: 3,
-          overviewRulerBorder: false,
-          renderLineHighlight: 'line',
-          readOnly: false
+          padding: { top: 18 },
+          scrollBeyondLastLine: false
         }}
       />
     </div>
@@ -35,6 +28,7 @@ export const CodeWorkspace = ({ value, onChange, language = "javascript" }) => {
 };
 
 export const ApiPlayground = ({ value, onChange }) => {
+  const { theme } = useContext(ThemeContext);
   const [method, setMethod] = useState('POST');
   const [url, setUrl] = useState('https://api.workplace.local/v1/auth');
   
@@ -42,7 +36,7 @@ export const ApiPlayground = ({ value, onChange }) => {
     if (!value) {
       onChange(`// API Playground Simulation\n// Method: ${method}\n// URL: ${url}\n// Request Body:\n{\n  \n}`);
     }
-  }, [method, onChange, url, value]);
+  }, []);
 
   return (
     <div className={styles.workspaceContainer}>
@@ -68,7 +62,7 @@ export const ApiPlayground = ({ value, onChange }) => {
         <Editor
           height="100%"
           defaultLanguage="json"
-          theme="vs-dark"
+          theme={theme === 'dark' ? "vs-dark" : "light"}
           value={value}
           onChange={(val) => onChange(val || '')}
           options={{
@@ -82,236 +76,269 @@ export const ApiPlayground = ({ value, onChange }) => {
   );
 };
 
-const analystEvents = [
-  'CEO requested churn analysis by cohort',
-  'Marketing asked for campaign ROI split',
-  'Finance flagged expansion revenue variance',
-  'Product requested onboarding funnel replay'
+// ── Dataset schema + sample data ─────────────────────────────────────────
+const SCHEMA = [
+  { name: 'user_id',       type: 'INTEGER',  nullable: false, unique: true,  example: '10482',              desc: 'Primary key, auto-incremented user identifier.' },
+  { name: 'cohort_month',  type: 'VARCHAR',  nullable: false, unique: false, example: '2024-03',            desc: 'YYYY-MM of user signup.' },
+  { name: 'plan',          type: 'ENUM',     nullable: false, unique: false, example: 'pro',                desc: 'Subscription tier: free | starter | pro | enterprise.' },
+  { name: 'country',       type: 'VARCHAR',  nullable: true,  unique: false, example: 'IN',                 desc: 'ISO 3166-1 alpha-2 country code.' },
+  { name: 'sessions_d30',  type: 'INTEGER',  nullable: false, unique: false, example: '14',                 desc: 'Sessions in the last 30 days.' },
+  { name: 'revenue_usd',   type: 'DECIMAL',  nullable: true,  unique: false, example: '49.00',              desc: 'Monthly revenue contribution, NULL for free tier.' },
+  { name: 'churned',       type: 'BOOLEAN',  nullable: false, unique: false, example: 'false',              desc: 'True if user cancelled in the period.' },
+  { name: 'feature_flags', type: 'JSON',     nullable: true,  unique: false, example: '{"dark_mode":true}', desc: 'Active feature flags for the user.' },
+  { name: 'created_at',    type: 'TIMESTAMP',nullable: false, unique: false, example: '2024-03-12 08:41:00',desc: 'UTC timestamp of account creation.' },
+  { name: 'last_seen_at',  type: 'TIMESTAMP',nullable: true,  unique: false, example: '2025-05-28 14:20:33',desc: 'UTC timestamp of last activity.' },
 ];
 
-const chartFeedback = [
-  'This visualization hides outlier distribution in enterprise accounts.',
-  'Retention dip aligns with onboarding form changes. Segment by acquisition source.',
-  'The KPI tile needs confidence context before executive review.',
-  'Anomaly is statistically meaningful but needs business impact framing.'
-];
+const CHART_DATA = {
+  revenue_by_month: {
+    label: 'Monthly Revenue (USD)',
+    data: [
+      { x: 'Jan', y: 18400 }, { x: 'Feb', y: 21300 }, { x: 'Mar', y: 19800 },
+      { x: 'Apr', y: 24500 }, { x: 'May', y: 27100 }, { x: 'Jun', y: 25600 },
+      { x: 'Jul', y: 29800 }, { x: 'Aug', y: 31200 }, { x: 'Sep', y: 28900 },
+    ]
+  },
+  sessions_by_plan: {
+    label: 'Avg Sessions / Plan',
+    data: [
+      { x: 'Free', y: 3.2 }, { x: 'Starter', y: 9.4 }, { x: 'Pro', y: 18.7 }, { x: 'Enterprise', y: 31.1 }
+    ]
+  },
+  churn_by_cohort: {
+    label: 'Churn Rate % by Cohort Month',
+    data: [
+      { x: 'Sep', y: 8.2 }, { x: 'Oct', y: 7.6 }, { x: 'Nov', y: 9.1 },
+      { x: 'Dec', y: 11.3 }, { x: 'Jan', y: 6.8 }, { x: 'Feb', y: 5.4 },
+      { x: 'Mar', y: 4.9 }, { x: 'Apr', y: 4.1 }, { x: 'May', y: 3.6 },
+    ]
+  },
+  users_by_country: {
+    label: 'User Count by Country',
+    data: [
+      { x: 'IN', y: 4820 }, { x: 'US', y: 3910 }, { x: 'BR', y: 2100 },
+      { x: 'DE', y: 1540 }, { x: 'GB', y: 1320 }, { x: 'FR', y: 980 }
+    ]
+  },
+};
 
-const PipelineNode = ({ data }) => (
-  <div className={styles.pipelineNode}>
-    <Handle type="target" position={Position.Left} />
-    <strong>{data.label}</strong>
-    <span>{data.detail}</span>
-    <Handle type="source" position={Position.Right} />
-  </div>
-);
+const TYPE_COLORS = {
+  INTEGER: '#818cf8', VARCHAR: '#34d399', ENUM: '#f59e0b',
+  BOOLEAN: '#f43f5e', DECIMAL: '#06b6d4', JSON: '#a78bfa', TIMESTAMP: '#fb923c',
+};
 
-const nodeTypes = { pipeline: PipelineNode };
+// ── Shared mini SVG chart renderer ──────────────────────────────────────────
+const MiniChart = ({ dataset, chartType, color = '#818cf8', data }) => {
+  const d = data || CHART_DATA[dataset]?.data || [];
+  if (!d.length) return null;
 
-export const DataDashboard = ({ value, onChange }) => {
-  const { performance, activity, tasks } = useContext(WorkplaceContext);
-  const [tick, setTick] = useState(0);
-  const [activeRequest, setActiveRequest] = useState(0);
-  const [queryStatus, setQueryStatus] = useState('Synced');
+  const W = 520, H = 220, PL = 52, PR = 16, PT = 16, PB = 32;
+  const cW = W - PL - PR, cH = H - PT - PB;
+  const maxY = Math.max(...d.map(p => p.y));
+  const minY = chartType === 'scatter' ? Math.min(...d.map(p => p.y)) : 0;
+  const scaleY = v => cH - ((v - minY) / (maxY - minY || 1)) * cH;
+  const scaleX = (i, n) => (i / (n - 1 || 1)) * cW;
+  const barW = Math.max(8, cW / d.length - 6);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTick((current) => current + 1);
-      setActiveRequest((current) => (current + 1) % analystEvents.length);
-    }, 4200);
+  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const yv = minY + f * (maxY - minY);
+    const y = PT + scaleY(yv);
+    return { y, label: yv >= 1000 ? `${(yv/1000).toFixed(1)}k` : yv.toFixed(1) };
+  });
 
-    return () => clearInterval(interval);
-  }, []);
+  const renderBars = () => d.map((p, i) => {
+    const bh = scaleY(minY) - scaleY(p.y);
+    const x = PL + (i / d.length) * cW + (cW / d.length - barW) / 2;
+    const y = PT + scaleY(p.y);
+    return (
+      <g key={i}>
+        <rect x={x} y={y} width={barW} height={Math.max(2, bh)} fill={color} fillOpacity={0.85} rx={3} />
+        <text x={x + barW / 2} y={H - 8} textAnchor="middle" fontSize={9} fill="#94a3b8">{p.x}</text>
+      </g>
+    );
+  });
 
-  const metrics = useMemo(() => {
-    const confidence = performance?.confidenceScore || 67;
-    const completed = performance?.completedTasks || tasks.filter((task) => task.status === 'Evaluated').length;
-    const pulse = Math.sin(tick / 2);
-
-    return {
-      confidence: Math.min(98, Math.max(42, Math.round(confidence + pulse * 4))),
-      dataQuality: Math.min(99, Math.max(50, Math.round((performance?.dataQuality || 81) + pulse * 3))),
-      pipeline: Math.min(100, Math.max(35, Math.round((performance?.insightPipeline || 58) + completed * 2 + pulse * 5))),
-      requests: performance?.stakeholderRequests || Math.max(2, 7 - completed),
-      anomaly: Math.abs(Math.round(9 + pulse * 5))
-    };
-  }, [performance, tasks, tick]);
-
-  const trendData = useMemo(() => (
-    Array.from({ length: 12 }, (_, index) => {
-      const wave = Math.sin((tick + index) / 2.6);
-      return {
-        week: `W${index + 1}`,
-        retention: Math.round(64 + index * 1.4 + wave * 5),
-        activation: Math.round(48 + index * 2.1 + Math.cos((tick + index) / 3) * 4),
-        churn: Math.round(22 - index * 0.6 + Math.sin((tick + index) / 1.8) * 3)
-      };
-    })
-  ), [tick]);
-
-  const segmentData = useMemo(() => [
-    { name: 'Enterprise', value: 82 + (tick % 4) },
-    { name: 'Mid-market', value: 68 - (tick % 3) },
-    { name: 'Startup', value: 57 + (tick % 5) },
-    { name: 'Trial', value: 43 - (tick % 4) }
-  ], [tick]);
-
-  const pipelineNodes = useMemo(() => [
-    { id: 'dataset', type: 'pipeline', position: { x: 0, y: 72 }, data: { label: 'Live datasets', detail: 'user_cohorts_v2 + revenue_events' } },
-    { id: 'anomaly', type: 'pipeline', position: { x: 245, y: 18 }, data: { label: 'Anomaly detection', detail: `${metrics.anomaly}% churn spike flagged` } },
-    { id: 'confidence', type: 'pipeline', position: { x: 245, y: 132 }, data: { label: 'Confidence engine', detail: `${metrics.confidence}% decision confidence` } },
-    { id: 'recommendation', type: 'pipeline', position: { x: 500, y: 72 }, data: { label: 'AI recommendation', detail: 'Prioritize onboarding cohort repair' } }
-  ], [metrics.anomaly, metrics.confidence]);
-
-  const pipelineEdges = useMemo(() => [
-    { id: 'e1', source: 'dataset', target: 'anomaly', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e2', source: 'dataset', target: 'confidence', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e3', source: 'anomaly', target: 'recommendation', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e4', source: 'confidence', target: 'recommendation', markerEnd: { type: MarkerType.ArrowClosed } }
-  ], []);
-
-  const runQuery = () => {
-    setQueryStatus('Running');
-    setTimeout(() => {
-      setQueryStatus('Updated');
-      onChange?.(value || `SELECT cohort, retention_rate, churn_risk\nFROM user_cohorts_v2\nWHERE week >= current_date - interval '12 weeks'\nORDER BY churn_risk DESC;`);
-    }, 700);
+  const renderLine = () => {
+    const pts = d.map((p, i) => `${PL + scaleX(i, d.length)},${PT + scaleY(p.y)}`).join(' ');
+    const area = `M${PL},${PT + cH} L${d.map((p, i) => `${PL + scaleX(i, d.length)},${PT + scaleY(p.y)}`).join(' L')} L${PL + cW},${PT + cH} Z`;
+    return (
+      <>
+        <path d={area} fill={color} fillOpacity={0.12} />
+        <polyline points={pts} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+        {d.map((p, i) => (
+          <circle key={i} cx={PL + scaleX(i, d.length)} cy={PT + scaleY(p.y)} r={4} fill={color} stroke="#0f172a" strokeWidth={2}>
+            <title>{p.x}: {p.y}</title>
+          </circle>
+        ))}
+        {d.map((p, i) => (
+          <text key={i} x={PL + scaleX(i, d.length)} y={H - 8} textAnchor="middle" fontSize={9} fill="#94a3b8">{p.x}</text>
+        ))}
+      </>
+    );
   };
 
+  const renderScatter = () => d.map((p, i) => (
+    <g key={i}>
+      <circle cx={PL + scaleX(i, d.length)} cy={PT + scaleY(p.y)} r={6} fill={color} fillOpacity={0.8} stroke={color} strokeWidth={1.5}>
+        <title>{p.x}: {p.y}</title>
+      </circle>
+      <text x={PL + scaleX(i, d.length)} y={H - 8} textAnchor="middle" fontSize={9} fill="#94a3b8">{p.x}</text>
+    </g>
+  ));
+
   return (
-    <div className={styles.analyticsWorkspace}>
-      <header className={styles.analyticsHeader}>
-        <div>
-          <span className={styles.analyticsBadge}>PowerBI-style AI analytics copilot</span>
-          <h2>Revenue Retention Command Center</h2>
-          <p>Live datasets, SQL workspace, anomaly detection, and stakeholder-ready insight scoring.</p>
-        </div>
-        <button className={styles.refreshBtn} onClick={runQuery}><FiRefreshCw /> {queryStatus}</button>
-      </header>
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow: 'visible' }}>
+      {gridLines.map((gl, i) => (
+        <g key={i}>
+          <line x1={PL} y1={gl.y} x2={PL + cW} y2={gl.y} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
+          <text x={PL - 6} y={gl.y + 4} textAnchor="end" fontSize={9} fill="#64748b">{gl.label}</text>
+        </g>
+      ))}
+      {chartType === 'bar'     && renderBars()}
+      {chartType === 'line'    && renderLine()}
+      {chartType === 'scatter' && renderScatter()}
+    </svg>
+  );
+};
 
-      <section className={styles.kpiStrip}>
-        <motion.div className={styles.kpiCard} animate={{ y: [0, -2, 0] }} transition={{ duration: 2.6, repeat: Infinity }}>
-          <FiActivity />
-          <span>Confidence score</span>
-          <strong>{metrics.confidence}%</strong>
-        </motion.div>
-        <div className={styles.kpiCard}>
-          <FiDatabase />
-          <span>Data quality</span>
-          <strong>{metrics.dataQuality}%</strong>
-        </div>
-        <div className={styles.kpiCard}>
-          <FiGitPullRequest />
-          <span>Insight pipeline</span>
-          <strong>{metrics.pipeline}</strong>
-        </div>
-        <div className={styles.kpiCard}>
-          <FiAlertTriangle />
-          <span>Open requests</span>
-          <strong>{metrics.requests}</strong>
-        </div>
-      </section>
-
-      <div className={styles.analyticsGrid}>
-        <section className={styles.chartPanel}>
-          <div className={styles.panelTitle}><FiTrendingUp /> Retention and activation trends</div>
-          <ResponsiveContainer width="100%" height={210}>
-            <LineChart data={trendData}>
-              <CartesianGrid stroke="rgba(148,163,184,0.12)" vertical={false} />
-              <XAxis dataKey="week" stroke="#64748b" tickLine={false} />
-              <YAxis stroke="#64748b" tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(148,163,184,0.24)', borderRadius: 8 }} />
-              <Line type="monotone" dataKey="retention" stroke="#38bdf8" strokeWidth={2.5} dot={false} />
-              <Line type="monotone" dataKey="activation" stroke="#22c55e" strokeWidth={2.5} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </section>
-
-        <section className={styles.chartPanel}>
-          <div className={styles.panelTitle}><FiBarChart2 /> Segment health</div>
-          <ResponsiveContainer width="100%" height={210}>
-            <BarChart data={segmentData}>
-              <CartesianGrid stroke="rgba(148,163,184,0.12)" vertical={false} />
-              <XAxis dataKey="name" stroke="#64748b" tickLine={false} />
-              <YAxis stroke="#64748b" tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(148,163,184,0.24)', borderRadius: 8 }} />
-              <Bar dataKey="value" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </section>
-
-        <section className={styles.sqlPanel}>
-          <div className={styles.panelTitle}><FiDatabase /> SQL workspace</div>
-          <Editor
-            height="255px"
-            defaultLanguage="sql"
-            theme="vs-dark"
-            value={value || `SELECT cohort,\n       retention_rate,\n       activation_rate,\n       churn_risk\nFROM user_cohorts_v2\nWHERE week >= current_date - interval '12 weeks'\nORDER BY churn_risk DESC;`}
-            onChange={(val) => onChange(val || '')}
-            options={{
-              minimap: { enabled: false },
-              fontSize: 13,
-              lineHeight: 20,
-              padding: { top: 14 },
-              scrollBeyondLastLine: false
-            }}
-          />
-        </section>
-
-        <section className={styles.pipelinePanel}>
-          <div className={styles.panelTitle}><FiZap /> AI insight pipeline</div>
-          <ReactFlow nodes={pipelineNodes} edges={pipelineEdges} nodeTypes={nodeTypes} fitView proOptions={{ hideAttribution: true }}>
-            <Background color="rgba(148,163,184,0.2)" gap={18} />
-          </ReactFlow>
-        </section>
+// ── Schema Viewer ────────────────────────────────────────────────────────────
+const SchemaViewer = ({ schema = SCHEMA, datasetName = 'user_cohorts_v2.csv' }) => {
+  const [selected, setSelected] = useState(null);
+  return (
+    <div className={styles.schemaContainer}>
+      <div className={styles.schemaTitle}>
+        <span className={styles.schemaTableName}>📋 {datasetName}</span>
+        <span className={styles.schemaMeta}>{schema.length} columns · ~48,200 rows · last updated 2025-05-28</span>
       </div>
-
-      <aside className={styles.analyticsSidebar}>
-        <div className={styles.sidePanel}>
-          <div className={styles.panelTitle}><FiTrendingDown /> AI insight generation</div>
-          <ResponsiveContainer width="100%" height={120}>
-            <AreaChart data={trendData}>
-              <defs>
-                <linearGradient id="churnGradient" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="5%" stopColor="#fb7185" stopOpacity={0.45} />
-                  <stop offset="95%" stopColor="#fb7185" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area dataKey="churn" stroke="#fb7185" fill="url(#churnGradient)" />
-            </AreaChart>
-          </ResponsiveContainer>
-          <p>Retention dropped after onboarding redesign. Enterprise cohorts recover faster than trial cohorts.</p>
+      <div className={styles.schemaTable}>
+        <div className={styles.schemaHead}>
+          <div>Column</div><div>Type</div><div>Nullable</div><div>Unique</div><div>Example</div>
         </div>
+        {schema.map(col => (
+          <div
+            key={col.name}
+            className={`${styles.schemaRow} ${selected === col.name ? styles.schemaRowSelected : ''}`}
+            onClick={() => setSelected(selected === col.name ? null : col.name)}
+          >
+            <div className={styles.schemaColName}>{col.name}</div>
+            <div><span className={styles.schemaType} style={{ background: `${TYPE_COLORS[col.type]}22`, color: TYPE_COLORS[col.type] }}>{col.type}</span></div>
+            <div className={col.nullable ? styles.schemaYes : styles.schemaNo}>{col.nullable ? 'YES' : 'NOT NULL'}</div>
+            <div className={col.unique ? styles.schemaYes : styles.schemaNeutral}>{col.unique ? '✓ UNIQUE' : '—'}</div>
+            <div className={styles.schemaExample}>{col.example}</div>
+          </div>
+        ))}
+      </div>
+      {selected && (() => {
+        const col = schema.find(c => c.name === selected);
+        return (
+          <div className={styles.schemaDetail}>
+            <strong>{col.name}</strong>
+            <span>{col.desc}</span>
+            <code>ALTER TABLE {datasetName.replace(/\.csv$/, '')} RENAME COLUMN {col.name} TO new_name;</code>
+          </div>
+        );
+      })()}
+    </div>
+  );
+};
 
-        <div className={styles.sidePanel}>
-          <div className={styles.panelTitle}><FiAlertTriangle /> Stakeholder requests</div>
-          {[analystEvents[activeRequest], ...analystEvents.filter((_, index) => index !== activeRequest)].slice(0, 4).map((event, index) => (
-            <div key={`${event}-${index}`} className={styles.requestItem}>
-              <span>{index === 0 ? 'Live' : 'Queued'}</span>
-              <strong>{event}</strong>
-            </div>
+// ── Chart Builder ────────────────────────────────────────────────────────────
+const CHART_COLORS = ['#818cf8', '#34d399', '#f59e0b', '#f43f5e', '#06b6d4'];
+const ChartBuilder = ({ chartData = CHART_DATA }) => {
+  const [dataset, setDataset]   = useState(Object.keys(chartData)[0] || 'revenue_by_month');
+  const [chartType, setChartType] = useState('bar');
+  const [colorIdx, setColorIdx] = useState(0);
+
+  const ds = chartData[dataset] || Object.values(chartData)[0] || { label: 'No Data', data: [] };
+
+  return (
+    <div className={styles.chartContainer}>
+      <div className={styles.chartControls}>
+        <div className={styles.chartControlGroup}>
+          <label>Dataset</label>
+          <select value={dataset} onChange={e => setDataset(e.target.value)} className={styles.chartSelect}>
+            {Object.entries(chartData).map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className={styles.chartControlGroup}>
+          <label>Chart Type</label>
+          <div className={styles.chartTypeRow}>
+            {['bar', 'line', 'scatter'].map(t => (
+              <button key={t} className={`${styles.chartTypeBtn} ${chartType === t ? styles.chartTypeBtnActive : ''}`} onClick={() => setChartType(t)}>
+                {t === 'bar' ? '▌▌▌' : t === 'line' ? '⟋' : '⠿'} {t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={styles.chartControlGroup}>
+          <label>Color</label>
+          <div className={styles.colorSwatches}>
+            {CHART_COLORS.map((c, i) => (
+              <div key={i} className={`${styles.colorSwatch} ${colorIdx === i ? styles.colorSwatchActive : ''}`}
+                style={{ background: c }} onClick={() => setColorIdx(i)} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className={styles.chartArea}>
+        <div className={styles.chartTitle}>{ds.label}</div>
+        <MiniChart dataset={dataset} chartType={chartType} color={CHART_COLORS[colorIdx]} data={ds.data} />
+      </div>
+      <div className={styles.chartStats}>
+        {(() => {
+          const vals = ds.data.map(d => d.y);
+          const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+          const max = Math.max(...vals);
+          const min = Math.min(...vals);
+          return (
+            <>
+              <div className={styles.chartStat}><span>Min</span><strong>{min.toLocaleString()}</strong></div>
+              <div className={styles.chartStat}><span>Max</span><strong>{max.toLocaleString()}</strong></div>
+              <div className={styles.chartStat}><span>Avg</span><strong>{avg.toFixed(1)}</strong></div>
+              <div className={styles.chartStat}><span>Points</span><strong>{vals.length}</strong></div>
+            </>
+          );
+        })()}
+      </div>
+    </div>
+  );
+};
+
+// ── DataDashboard ─────────────────────────────────────────────────────────────
+export const DataDashboard = ({ value, onChange, task }) => {
+  const { theme } = useContext(ThemeContext);
+  const [activeDataTab, setActiveDataTab] = useState('query');
+
+  return (
+    <div className={styles.workspaceContainer}>
+      <div className={styles.dataHeader}>
+        <div className={styles.dataTabs}>
+          {[['query','Query Editor'],['schema','Schema Viewer'],['chart','Chart Builder']].map(([id, label]) => (
+            <button
+              key={id}
+              className={activeDataTab === id ? styles.activeTab : ''}
+              onClick={() => setActiveDataTab(id)}
+            >{label}</button>
           ))}
         </div>
-
-        <div className={styles.sidePanel}>
-          <div className={styles.panelTitle}><FiCpu /> AI chart feedback</div>
-          {chartFeedback.map((feedback, index) => (
-            <div key={feedback} className={styles.feedbackItem}>
-              <i>{index + 1}</i>
-              <span>{feedback}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.sidePanel}>
-          <div className={styles.panelTitle}><FiActivity /> Business intelligence feed</div>
-          {(activity.length ? activity : [{ title: 'Workspace simulation started', detail: 'Waiting for live evaluator events.' }]).slice(0, 4).map((event, index) => (
-            <div key={`${event.title}-${index}`} className={styles.feedRow}>
-              <strong>{event.title}</strong>
-              <span>{event.detail}</span>
-            </div>
-          ))}
-        </div>
-      </aside>
+        <div className={styles.datasetInfo}>Dataset: {task?.datasetName || 'user_cohorts_v2.csv'}</div>
+      </div>
+      <div className={styles.dataWorkspace}>
+        {activeDataTab === 'query' && (
+          <Editor
+            height="100%"
+            defaultLanguage="sql"
+            theme={theme === 'dark' ? 'vs-dark' : 'light'}
+            value={value}
+            onChange={(val) => onChange(val || '')}
+            options={{ minimap: { enabled: false }, fontSize: 14, padding: { top: 18 } }}
+          />
+        )}
+        {activeDataTab === 'schema' && <SchemaViewer schema={task?.datasetSchema} datasetName={task?.datasetName} />}
+        {activeDataTab === 'chart'  && <ChartBuilder chartData={task?.chartData} />}
+      </div>
     </div>
   );
 };
@@ -342,3 +369,17 @@ export const RichTextEditor = ({ value, onChange }) => {
   );
 };
 
+export const getWorkspaceComponent = (role) => {
+  switch(role) {
+    case 'frontend_developer':
+      return CodeWorkspace;
+    case 'backend_developer':
+      return ApiPlayground;
+    case 'data_analyst':
+      return DataDashboard;
+    case 'uiux_designer':
+      return DesignWorkspace;
+    default:
+      return RichTextEditor;
+  }
+};

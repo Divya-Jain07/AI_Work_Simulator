@@ -1,4 +1,6 @@
+import { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { ThemeContext } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
 import {
   FiArrowRight,
@@ -6,7 +8,9 @@ import {
   FiCpu,
   FiMessageSquare,
   FiTarget,
-  FiZap
+  FiZap,
+  FiMoon,
+  FiSun
 } from 'react-icons/fi';
 import styles from './Landing.module.css';
 
@@ -46,6 +50,7 @@ const fadeUp = {
 };
 
 const Landing = () => {
+  const { theme, toggleTheme } = useContext(ThemeContext);
   return (
     <div className={styles.page}>
       <nav className={styles.navbar}>
@@ -56,7 +61,11 @@ const Landing = () => {
           <span>WorkSim</span>
           <span className={styles.logoBox}>AI</span>
         </Link>
-        <div className={styles.navRight} aria-hidden="true" />
+        <div className={styles.navRight}>
+          <button onClick={toggleTheme} className={styles.themeToggleBtn} aria-label="Toggle theme">
+            {theme === 'dark' ? <FiSun size={20} /> : <FiMoon size={20} />}
+          </button>
+        </div>
       </nav>
 
       <main>

@@ -1,6 +1,56 @@
-import { assignManagerTask } from './aiManager.js';
-import { chatWithTeammateService } from './aiTeammate.js';
-import { createChatCompletion, logAIError } from './aiClient.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'dummy_key');
+const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+// ---------------------------------------------------------------------------
+// Retry helper: honours the retryDelay from Gemini 429 responses and falls
+// back to exponential backoff when the delay is not specified.
+// ---------------------------------------------------------------------------
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getRetryDelayMs = (error) => {
+  try {
+    const retryInfo = error?.errorDetails?.find(
+      (d) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo'
+    );
+    if (retryInfo?.retryDelay) {
+      // retryDelay is formatted as e.g. "26s"
+      const seconds = parseInt(retryInfo.retryDelay, 10);
+      if (!isNaN(seconds)) return seconds * 1000;
+    }
+  } catch (_) {
+    // ignore parse errors
+  }
+  return null;
+};
+
+/**
+ * Wraps an async AI call fn with up to `maxRetries` retries on 429.
+ * Uses the API-provided retryDelay when present, otherwise exponential backoff.
+ */
+const withRetry = async (fn, maxRetries = 3) => {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (error?.status === 429 && attempt < maxRetries) {
+        attempt++;
+        const apiDelay = getRetryDelayMs(error);
+        const backoff = apiDelay ?? Math.min(1000 * 2 ** attempt, 60000);
+        console.warn(`Gemini 429 – retrying in ${backoff}ms (attempt ${attempt}/${maxRetries})`);
+        await sleep(backoff);
+      } else {
+        throw error;
+      }
+    }
+  }
+};
+
+// ---------------------------------------------------------------------------
 
 export const generateTask = async (userSkills) => {
   const prompt = `You are an AI Manager in a tech company. 
@@ -9,29 +59,18 @@ The task should be practical, focused, and take about an hour to complete.
 Return the response as a JSON string with the following exact keys: "title", "description", "requirements" (array of strings), and "difficulty" (Easy, Medium, Hard). Do not include markdown blocks like \`\`\`json, just the raw JSON object.`;
 
   try {
-    const responseText = await createChatCompletion({
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.75,
-      maxTokens: 900
-    });
-    return JSON.parse(cleanJson(responseText));
+    const result = await withRetry(() => model.generateContent(prompt));
+    const responseText = result.response.text();
+    // Clean up if it contains markdown
+    const cleanedText = responseText.replace(/```json\n?|\n?```/g, '').trim();
+    return JSON.parse(cleanedText);
   } catch (error) {
-    logAIError(error);
+    console.error("AI Error generating task:", error);
     throw new Error('Failed to generate task');
   }
 };
 
-const cleanJson = (text) => {
-  const cleaned = String(text || '').replace(/```json\n?|\n?```/g, '').trim();
-  const firstBrace = cleaned.indexOf('{');
-  const lastBrace = cleaned.lastIndexOf('}');
-
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    return cleaned.slice(firstBrace, lastBrace + 1);
-  }
-
-  return cleaned;
-};
+const cleanJson = (text) => text.replace(/```json\n?|\n?```/g, '').trim();
 
 const parseJsonOrFallback = (text, fallback) => {
   try {
@@ -42,76 +81,66 @@ const parseJsonOrFallback = (text, fallback) => {
   }
 };
 
-const normalizeEvaluation = (evaluation, fallback = {}) => {
-  const normalized = {
-    ...fallback,
-    ...evaluation
-  };
-
-  normalized.strengths = Array.isArray(normalized.strengths) ? normalized.strengths : [];
-  normalized.weaknesses = Array.isArray(normalized.weaknesses) ? normalized.weaknesses : [];
-  normalized.suggestions = Array.isArray(normalized.suggestions) ? normalized.suggestions : [];
-  normalized.recommendations = Array.isArray(normalized.recommendations) ? normalized.recommendations : [];
-  normalized.skills = normalized.skills || normalized.skillUpdates || fallback.skills || {};
-  normalized.skillUpdates = normalized.skillUpdates || normalized.skills || fallback.skillUpdates || {};
-
-  return normalized;
-};
-
 export const generateTaskForRole = async ({ user, role, manager }) => {
+  const prompt = manager.buildTaskPrompt({ user, role });
+
   try {
-    const userSkills = user.roleSkills?.[role.id] || role.skills;
-    const task = await assignManagerTask({ user, role, userSkills });
-    return task;
+    const result = await withRetry(() => model.generateContent(prompt));
+    const responseText = result.response.text();
+    return {
+      ...manager.fallbackTask(role),
+      ...parseJsonOrFallback(responseText, manager.fallbackTask(role)),
+      role: role.id
+    };
   } catch (error) {
-    logAIError(error);
+    console.error('AI Error generating role task:', error);
     return manager.fallbackTask(role);
   }
 };
 
 export const chatWithTeammate = async (history, currentMessage) => {
   try {
+    // Gemini requires the first message to be from the 'user'.
+    // We filter out the initial greeting from the 'model' if it's the first message.
+    let validHistory = history.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }],
+    }));
+    
+    while (validHistory.length > 0 && validHistory[0].role === 'model') {
+      validHistory.shift();
+    }
+
+    const chat = model.startChat({ history: validHistory });
+
     const systemPrompt = `You are an AI Teammate. Be helpful, concise, and friendly. Guide the user but do not write all the code for them.`;
-    return createChatCompletion({
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...history
-          .filter((msg) => msg?.content)
-          .slice(-12)
-          .map((msg) => ({
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: String(msg.content)
-          })),
-        { role: 'user', content: String(currentMessage || '').trim() }
-      ],
-      temperature: 0.65,
-      maxTokens: 700
-    });
+    const result = await withRetry(() =>
+      chat.sendMessage(`System Prompt: ${systemPrompt}\nUser: ${currentMessage}`)
+    );
+    return result.response.text();
   } catch (error) {
-    logAIError(error);
+    console.error("AI Error chatting:", error);
     throw new Error('Failed to communicate with teammate');
   }
 };
 
-export const chatWithRoleTeammate = async ({ user, history = [], currentMessage, role, manager }) => {
+export const chatWithRoleTeammate = async ({ history = [], currentMessage, role, manager }) => {
   try {
-    const teammate = {
-      name: role.teammateName,
-      title: role.teammateTitle
-    };
-    const reply = await chatWithTeammateService({
-      userId: user._id,
-      roleId: role.id,
-      role,
-      teammate,
-      currentMessage,
-      workspaceType: role.id,
-      history
-    });
-    return reply;
+    const validHistory = history
+      .map((msg) => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }],
+      }))
+      .filter((msg, index) => index > 0 || msg.role === 'user');
+
+    const chat = model.startChat({ history: validHistory });
+    const result = await withRetry(() =>
+      chat.sendMessage(`System Prompt: ${manager.teammateSystemPrompt(role)}\nUser: ${currentMessage}`)
+    );
+    return result.response.text();
   } catch (error) {
-    logAIError(error);
-    throw error;
+    console.error('AI Error chatting with role teammate:', error);
+    return 'I hit an issue reaching the AI service, but here is the practical next step: restate the failure, isolate one reproducible case, and verify your fix against the acceptance criteria.';
   }
 };
 
@@ -126,14 +155,12 @@ ${submissionContent}
 Evaluate the submission. Return the response as a JSON string with the following exact keys: "score" (number from 0 to 100), "feedback" (detailed string feedback), "skillUpdates" (object with keys "problemSolving", "coding", "communication", each having a number indicating the change, e.g., +2 or -1). Do not include markdown blocks like \`\`\`json, just the raw JSON object.`;
 
   try {
-    const responseText = await createChatCompletion({
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.35,
-      maxTokens: 900
-    });
-    return JSON.parse(cleanJson(responseText));
+    const result = await withRetry(() => model.generateContent(prompt));
+    const responseText = result.response.text();
+    const cleanedText = responseText.replace(/```json\n?|\n?```/g, '').trim();
+    return JSON.parse(cleanedText);
   } catch (error) {
-    logAIError(error);
+    console.error("AI Error evaluating submission:", error);
     throw new Error('Failed to evaluate submission');
   }
 };
@@ -142,15 +169,15 @@ export const evaluateSubmissionForRole = async ({ task, submission, role, evalua
   const prompt = evaluator.buildEvaluationPrompt({ task, submission, role });
 
   try {
-    const responseText = await createChatCompletion({
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.35,
-      maxTokens: 1000
-    });
+    const result = await withRetry(() => model.generateContent(prompt));
+    const responseText = result.response.text();
     const fallback = evaluator.fallbackEvaluation();
-    return normalizeEvaluation(parseJsonOrFallback(responseText, fallback), fallback);
+    return {
+      ...fallback,
+      ...parseJsonOrFallback(responseText, fallback)
+    };
   } catch (error) {
-    logAIError(error);
+    console.error('AI Error evaluating role submission:', error);
     return evaluator.fallbackEvaluation();
   }
 };

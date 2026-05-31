@@ -12,8 +12,6 @@ import authRoutes from './routes/authRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import roleRoutes from './routes/roleRoutes.js';
-import dashboardRoutes from './routes/dashboardRoutes.js';
-import sqlRoutes from './routes/sqlRoutes.js';
 import { registerWorkplaceSocket } from './sockets/workplaceSocket.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -42,8 +40,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/roles', roleRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/sql', sqlRoutes);
 
 registerWorkplaceSocket(io);
 

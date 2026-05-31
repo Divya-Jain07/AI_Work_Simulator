@@ -1,11 +1,11 @@
 import { useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Editor from '@monaco-editor/react';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiCheckCircle, FiClock, FiSend, FiShield, FiTarget, FiChevronLeft, FiChevronRight, FiBookOpen, FiCpu } from 'react-icons/fi';
 import Chatbot from '../components/ui/Chatbot';
-import WorkspaceEngine from '../engine/WorkspaceEngine';
-import { resolveWorkspaceDefinition } from '../config/workspaceConfig';
+import { getWorkspaceComponent } from '../components/workspaces/Workspaces';
 import { AuthContext } from '../context/AuthContext';
 import { WorkplaceContext } from '../context/workplaceContextObject';
 import styles from './Workspace.module.css';
@@ -33,18 +33,6 @@ const starterByRole = {
 `
 };
 
-const ROLE_DISPLAY_NAME = {
-  uiux_designer: 'UI/UX Designer',
-  frontend_developer: 'Frontend Developer',
-  backend_developer: 'Backend Developer',
-  data_analyst: 'Data Analyst'
-};
-
-const formatRoleName = (role) =>
-  ROLE_DISPLAY_NAME[role] ||
-  role?.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') ||
-  'Workspace';
-
 const normalizeSkillUpdates = (skillUpdates = {}) => {
   if (Array.isArray(skillUpdates)) return Object.fromEntries(skillUpdates);
   return skillUpdates || {};
@@ -68,12 +56,8 @@ const Workspace = () => {
   const [checkedRequirements, setCheckedRequirements] = useState({});
   const [checkedAcceptance, setCheckedAcceptance] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [sidebarWidth, setSidebarWidth] = useState(() => Math.min(520, Math.max(300, Math.round(window.innerWidth * 0.38))));
+  const [sidebarWidth, setSidebarWidth] = useState(550);
   const [isResizing, setIsResizing] = useState(false);
-
-  const toggleSidebar = useCallback(() => {
-    setSidebarOpen((current) => !current);
-  }, []);
 
   const startResizing = useCallback((mouseDownEvent) => {
     mouseDownEvent.preventDefault();
@@ -86,9 +70,10 @@ const Workspace = () => {
 
   const resize = useCallback((mouseMoveEvent) => {
     if (isResizing) {
-      const maxWidth = Math.min(620, Math.max(300, Math.round(window.innerWidth * 0.46)));
-      const newWidth = Math.min(maxWidth, Math.max(280, mouseMoveEvent.clientX));
-      setSidebarWidth(newWidth);
+      const newWidth = mouseMoveEvent.clientX;
+      if (newWidth >= 280 && newWidth <= 900) {
+        setSidebarWidth(newWidth);
+      }
     }
   }, [isResizing]);
 
@@ -130,8 +115,24 @@ const Workspace = () => {
   }, [id]);
 
   const skillDeltas = useMemo(() => normalizeSkillUpdates(evaluation?.skillUpdates), [evaluation]);
-  const workspaceDefinition = useMemo(() => (task ? resolveWorkspaceDefinition(task) : null), [task]);
-  const isDataAnalystWorkspace = task?.role === 'data_analyst';
+
+  // Normalise whichever field name the server uses, and sanitize any direct
+  // LinkedIn Learning links into keyword-search URLs as a final client-side guard.
+  const learningRecs = useMemo(() => {
+    const raw = evaluation?.learningRecommendations || evaluation?.recommendations || [];
+    return raw.map(rec => {
+      const url = rec.courseUrl || '';
+      const isDirect = url.includes('linkedin.com/learning/') && !url.includes('/search?');
+      if (isDirect) {
+        const kw = encodeURIComponent(
+          (rec.courseTitle || rec.text || 'professional development')
+            .replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80)
+        );
+        return { ...rec, courseUrl: `https://www.linkedin.com/learning/search?keywords=${kw}` };
+      }
+      return rec;
+    });
+  }, [evaluation]);
 
   const handleSubmit = async () => {
     if (!code.trim()) return;
@@ -167,20 +168,9 @@ const Workspace = () => {
 
   return (
     <div className={`${styles.workspace} ${!sidebarOpen ? styles.workspaceCollapsed : ''}`}>
-      <button
-        type="button"
-        className={styles.workspaceSidebarToggle}
-        onClick={toggleSidebar}
-        title={sidebarOpen ? 'Collapse instructions' : 'Expand instructions'}
-        aria-label={sidebarOpen ? 'Collapse instructions sidebar' : 'Expand instructions sidebar'}
-        aria-expanded={sidebarOpen}
-      >
-        {sidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
-      </button>
-
       <div 
         className={`${styles.leftPane} ${!sidebarOpen ? styles.leftPaneCollapsed : ''}`}
-        style={{ width: sidebarOpen ? sidebarWidth : 0, flexBasis: sidebarOpen ? sidebarWidth : 0 }}
+        style={{ width: sidebarOpen ? sidebarWidth : 0 }}
       >
         <div className={styles.paneHeader}>
           <button className={styles.backButton} onClick={() => navigate('/dashboard')} title="Back to Command Center">
@@ -202,6 +192,14 @@ const Workspace = () => {
               </button>
             ))}
           </div>
+
+          <button 
+            className={styles.sidebarToggleButton} 
+            onClick={() => setSidebarOpen(false)}
+            title="Collapse Sidebar"
+          >
+            <FiChevronLeft size={20} />
+          </button>
         </div>
 
         <div className={styles.tabContent}>
@@ -297,7 +295,7 @@ const Workspace = () => {
                       </div>
                     );
                   })}
-              </div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -326,7 +324,7 @@ const Workspace = () => {
                       </div>
                     );
                   })}
-              </div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -373,11 +371,11 @@ const Workspace = () => {
                     ))}
                   </div>
 
-                  {evaluation.learningRecommendations && evaluation.learningRecommendations.length > 0 && (
+                  {learningRecs.length > 0 && (
                     <div className={styles.learningRecommendationsSection}>
                       <h3>Recommended Learning</h3>
                       <div className={styles.learningRecommendationsList}>
-                        {evaluation.learningRecommendations.map((rec, i) => (
+                        {learningRecs.map((rec, i) => (
                           <div key={i} className={styles.learningCard}>
                             <div className={styles.learningCardHeader}>
                               <span className={rec.type === 'weakness' ? styles.badgeWeakness : styles.badgeSuggestion}>
@@ -419,11 +417,7 @@ const Workspace = () => {
               style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
             >
               <div className={styles.chatWrapper} style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <Chatbot
-                  key={`${task._id}-${task.role}`}
-                  roleId={task.role}
-                  teammate={workspaceDefinition?.teammatePersona || roleContext?.teammate}
-                />
+                <Chatbot key={`${task._id}-${task.role}`} taskId={task._id} roleId={task.role} teammate={roleContext?.teammate} />
               </div>
             </motion.div>
           )}
@@ -440,9 +434,20 @@ const Workspace = () => {
 
       <div className={styles.rightPane}>
         <div className={styles.editorHeader}>
-          <div>
-            <span>Submission Workspace</span>
-            <h2>{formatRoleName(task.role)}</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {!sidebarOpen && (
+              <button 
+                className={styles.sidebarExpandButton}
+                onClick={() => setSidebarOpen(true)}
+                title="Show Instructions"
+              >
+                <FiChevronRight /> <span>Instructions</span>
+              </button>
+            )}
+            <div>
+              <span>Submission workspace</span>
+              <h2>{task.role?.replaceAll('_', ' ')}</h2>
+            </div>
           </div>
           <button
             className={styles.submitButton}
@@ -455,14 +460,10 @@ const Workspace = () => {
         </div>
         {error && <div className={styles.errorBanner}>{error}</div>}
         <div className={styles.editorContainer}>
-          <WorkspaceEngine
-            task={task}
-            value={code}
-            onChange={setCode}
-            onSubmit={handleSubmit}
-            submitting={submitting}
-            disabled={task.status === 'Evaluated'}
-          />
+          {(() => {
+            const WorkspaceComponent = getWorkspaceComponent(task.role);
+            return <WorkspaceComponent value={code} onChange={setCode} task={task} />;
+          })()}
         </div>
       </div>
     </div>

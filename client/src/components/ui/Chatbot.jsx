@@ -1,102 +1,48 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { useDashboardStore } from '../../engine/dashboardStore';
 import styles from './Chatbot.module.css';
 
-// Typewriter component for realistic live typing feel
-const TypewriterText = ({ text, onComplete, onCharTyped }) => {
-  const [visibleChars, setVisibleChars] = useState(0);
-  const onCompleteRef = useRef(onComplete);
-  const onCharTypedRef = useRef(onCharTyped);
-
-  useEffect(() => {
-    onCompleteRef.current = onComplete;
-    onCharTypedRef.current = onCharTyped;
-  }, [onComplete, onCharTyped]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVisibleChars((current) => {
-        if (current >= text.length) {
-          clearInterval(interval);
-          onCompleteRef.current?.();
-          return current;
-        }
-
-        onCharTypedRef.current?.();
-        return current + 1;
-      });
-    }, 12); // ~12ms per char for a smooth, readable speed
-
-    return () => clearInterval(interval);
-  }, [text]);
-
-  return <span>{text.slice(0, visibleChars)}</span>;
-};
-
-const Chatbot = ({ roleId, teammate }) => {
-  const [messages, setMessages] = useState([]);
+const Chatbot = ({ taskId, roleId, teammate }) => {
+  const [messages, setMessages] = useState(() => {
+    const saved = sessionStorage.getItem(`chat-history-${taskId}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // ignore JSON parse error
+      }
+    }
+    return [
+      {
+        role: 'model',
+        content: `${teammate?.name || 'Your AI teammate'} is online. I will tailor guidance to this role and keep the solution practical.`
+      }
+    ];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState('connecting');
-  const applyLiveDashboardSnapshot = useDashboardStore((state) => state.applyLiveSnapshot);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Fetch chat history from database when roleId changes
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        setLoading(true);
-        setConnectionStatus('connecting');
-        const { data } = await axios.get(`http://localhost:5000/api/ai/teammate/history?roleId=${roleId}`);
-        if (data.history && data.history.length > 0) {
-          setMessages(data.history.map(msg => ({ ...msg, isNew: false })));
-        } else {
-          setMessages([
-            {
-              role: 'model',
-              content: `${teammate?.name || 'Your AI teammate'} is online. I will tailor guidance to this role and keep the solution practical.`,
-              isNew: false
-            }
-          ]);
-        }
-        setConnectionStatus('online');
-      } catch (error) {
-        console.error("Error fetching chat history", error);
-        setConnectionStatus('offline');
-        setMessages([
-          {
-            role: 'model',
-            content: `${teammate?.name || 'Your AI teammate'} is online. I will tailor guidance to this role and keep the solution practical.`,
-            isNew: false
-          }
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHistory();
-  }, [roleId, teammate]);
-
-  useEffect(() => {
+    if (taskId) {
+      sessionStorage.setItem(`chat-history-${taskId}`, JSON.stringify(messages));
+    }
     scrollToBottom();
-  }, [messages, loading]);
+  }, [messages, taskId]);
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim()) return;
 
     const userMessage = input.trim();
-    const newMessages = [...messages, { role: 'user', content: userMessage, isNew: false }];
+    const newMessages = [...messages, { role: 'user', content: userMessage }];
     setMessages(newMessages);
     setInput('');
     setLoading(true);
-    setConnectionStatus('thinking');
 
     try {
       const { data } = await axios.post('http://localhost:5000/api/ai/teammate/chat', {
@@ -104,80 +50,32 @@ const Chatbot = ({ roleId, teammate }) => {
         message: userMessage,
         roleId
       });
-      const reply = typeof data.reply === 'string' ? data.reply.trim() : '';
-
-      if (!reply) {
-        throw new Error('AI teammate returned an empty response');
-      }
-
-      // Append response and flag as isNew so typewriter effect triggers
-      setMessages([...newMessages, { role: 'model', content: reply, isNew: true }]);
-      if (data.dashboardSnapshot) applyLiveDashboardSnapshot(data.dashboardSnapshot);
-      setConnectionStatus('online');
+      setMessages([...newMessages, { role: 'model', content: data.reply }]);
     } catch (error) {
       console.error("Chat error", error);
-      setConnectionStatus('offline');
-      setMessages([
-        ...newMessages,
-        {
-          role: 'model',
-          content: error.response?.data?.message || 'AI teammate is temporarily unavailable. Please try again in a moment.',
-          isNew: true,
-          isError: true
-        }
-      ]);
+      setMessages([...newMessages, { role: 'model', content: 'Sorry, I am having trouble connecting right now.' }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const statusLabel = loading
-    ? 'AI is thinking...'
-    : connectionStatus === 'offline'
-      ? 'offline'
-      : connectionStatus === 'connecting'
-        ? 'connecting'
-        : 'online';
-
   return (
     <div className={styles.chatContainer}>
       <div className={styles.chatHeader}>
-        <div className={styles.headerLeft}>
-          <div className={`${styles.statusDot} ${connectionStatus === 'offline' ? styles.statusDotOffline : loading ? styles.statusDotTyping : styles.statusDotActive}`}></div>
-          <div className={styles.teammateIdentity}>
-            <span className={styles.teammateName}>{teammate?.name || 'AI Teammate'}</span>
-            <small className={styles.teammateTitle}>{teammate?.title || 'Role-aware collaborator'}</small>
-          </div>
+        <div>
+          <div className={styles.statusDot}></div>
         </div>
-        <div className={styles.headerRight}>
-          <span className={styles.onlineText}>
-            {statusLabel}
-          </span>
+        <div className={styles.teammateIdentity}>
+          <span>{teammate?.name || 'AI Teammate'}</span>
+          <small>{teammate?.title || 'Role-aware collaborator'}</small>
         </div>
       </div>
       
       <div className={styles.messagesArea}>
         {messages.map((msg, index) => (
           <div key={index} className={`${styles.messageWrapper} ${msg.role === 'user' ? styles.userWrapper : styles.modelWrapper}`}>
-            <div className={`${styles.messageBubble} ${msg.role === 'user' ? styles.userBubble : styles.modelBubble} ${msg.isError ? styles.errorBubble : ''}`}>
-              {msg.role === 'model' && msg.isNew ? (
-                <TypewriterText
-                  key={`${index}-${msg.content}`}
-                  text={msg.content}
-                  onCharTyped={scrollToBottom}
-                  onComplete={() => {
-                    setMessages((currentMessages) =>
-                      currentMessages.map((currentMessage, currentIndex) =>
-                        currentIndex === index
-                          ? { ...currentMessage, isNew: false }
-                          : currentMessage
-                      )
-                    );
-                  }}
-                />
-              ) : (
-                msg.content
-              )}
+            <div className={`${styles.messageBubble} ${msg.role === 'user' ? styles.userBubble : styles.modelBubble}`}>
+              {msg.content}
             </div>
           </div>
         ))}
@@ -196,12 +94,12 @@ const Chatbot = ({ roleId, teammate }) => {
           type="text" 
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={`Message ${teammate?.name || 'teammate'}...`} 
+          placeholder="Ask for help or guidance..." 
           className={styles.chatInput}
           disabled={loading}
         />
         <button type="submit" className={styles.sendBtn} disabled={loading || !input.trim()}>
-          Send
+          Ask
         </button>
       </form>
     </div>
